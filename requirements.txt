@@ -1,0 +1,8 @@
+scikit-image
+spacy
+
+# App
+streamlit
+
+# Models
+git+https://github.com/openai/CLIP.git
