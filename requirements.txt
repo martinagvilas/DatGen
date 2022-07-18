@@ -1,5 +1,6 @@
 scikit-image
 spacy
+pandas
 
 # App
 streamlit
