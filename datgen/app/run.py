@@ -1,131 +1,133 @@
 import streamlit as st
-import pandas as pd
+import argparse
 
-## TODO: add help in each input
-
-
-def reset_values():
-    st.session_state['i'] = 1
-    st.session_state['obj_name'] = ''
-    st.session_state['size_random'] = True
-    st.session_state['size_min'] = 50
-    st.session_state['size_max'] = 50
-    st.session_state['vis_att'] = ''
-    st.session_state['loc_random'] = True
-    st.session_state['loc'] = ''
-    st.session_state['contr'] = 'Yes'
-    st.session_state['lum'] = 'Yes'
+# initial specification formula
+init_spec = {
+    'Object name': '',
+    'Object size': [50, 50],
+    'Visual attributes': [''],
+    'Location': [''],
+    'Match contrast': 'No',
+    'Match luminance': 'No',
+}
 
 
-def store_info():
-    res_info = {}
-    res_info['Object name'] = st.session_state['obj_name'] 
-    
-    if st.session_state['size_random']:
-        res_info['Object size'] = 'Random'
+# callback for button "Add"
+def add_spec():
+    st.session_state['specs'].append(init_spec)
+    st.session_state['chosen_spec_i'] = len(st.session_state['specs']) - 1
+
+
+# callback for button "Remove"
+def remove_spec():
+    if len(st.session_state['specs']) > 0:
+        st.session_state['specs'].pop(st.session_state['chosen_spec_i'])
+        st.session_state['chosen_spec_i'] = 0
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--max_n_spec', default=20, choices=range(50), type=int)
+    args = parser.parse_args()
+
+    # define font size for later use
+    st.markdown("""
+                <style>
+                .big-font {
+                    font-size:80px;
+                }
+                .medium-font{
+                    font-size:50px;
+                }
+                </style>
+                """, unsafe_allow_html=True)
+
+    # Session states initialization
+    if 'specs' not in st.session_state:
+        st.session_state['specs'] = []
+        st.session_state['chosen_spec_i'] = 0
+
+    # sidebar initialization
+    with st.sidebar:
+        st.markdown('<p class="big-font">DatGen</p>', unsafe_allow_html=True)
+        st.title('Specifications')
+        col1, col2, _, _, _ = st.columns(5, gap='small')
+        col1.button('Add', on_click=add_spec)
+        col2.button('Remove', on_click=remove_spec)
+        spec_choice = st.radio(label='📌 your objects here',
+                               index=st.session_state['chosen_spec_i'],
+                               options=[f'Object {i}' for i in range(len(st.session_state['specs']))])
+
+    if spec_choice is None:
+        st.markdown('<p class="medium-font">Please specify your objects!</p>', unsafe_allow_html=True)
     else:
-        res_info['Object size'] = [
-            st.session_state['size_min'], st.session_state['size_max']
-        ]
+        i = int(spec_choice[7:])
+        st.session_state['chosen_spec_i'] = i
+        current_spec = st.session_state['specs'][i]
+        st.subheader(f'Object {i}')
+        form = st.form(key=f'{i}_obj_form', clear_on_submit=True)
+        with form:
+            # Define object
+            obj_name = st.text_input('Name of object', key=f'{i}_obj_name',
+                                     value=current_spec['Object name'])
 
-    res_info['Visual attributes'] = st.session_state['vis_att'].split(';')
+            # Define size
+            st.markdown('__Size__')
+            cols_s = st.columns(3)
+            size_random = cols_s[0].checkbox("Random", key=f'{i}_rand_size',
+                                             value=True if current_spec['Object size'] == 'Random' else False)
+            size_min = cols_s[1].number_input(
+                'Min occupancy (%)', min_value=0, max_value=100, step=5, key=f'{i}_min_size',
+                value=current_spec['Object size'][0] if current_spec['Object size'] != 'Random' else 50)
+            size_max = cols_s[2].number_input(
+                'Max occupancy (%)', min_value=0, max_value=100, step=5, key=f'{i}_max_size',
+                value=current_spec['Object size'][1] if current_spec['Object size'] != 'Random' else 50)
 
-    if st.session_state['loc_random']:
-        res_info['Location'] = 'Random'
-    else:
-        res_info['Location'] = st.session_state['loc'].split(';')
+            # Define visual attributes
+            st.markdown('__Visual Attributes__')
+            vis_att = st.text_input(
+                label='List of attributes separated by ";"', key=f'{i}_vis_att',
+                value='' if current_spec['Visual attributes'] == 'Random' else ';'.join(
+                    current_spec['Visual attributes']))
 
-    res_info['Match contrast'] = st.session_state['contr']
-    res_info['Match luminance'] = st.session_state['lum']
+            # Define location
+            st.markdown('__Location__')
+            cols_l = st.columns(2)
+            loc_random = cols_l[0].checkbox("Random", key=f'{i}_rand_loc',
+                                            value=True if current_spec['Location'] == 'Random' else False)
+            loc = cols_l[1].text_input(
+                label='List of attributes for location separated by ";"', key=f'{i}_loc',
+                value='' if current_spec['Location'] == 'Random' else ';'.join(current_spec['Location']))
 
-    st.session_state[f'results_{st.session_state["i"]}'] = res_info
+            # Define global visual attributes
+            st.markdown('__Global attributes__')
+            cols_ga = st.columns(2)
+            contr = cols_ga[0].radio(label='Match Contrast', options=['No', 'Yes'], key=f'{i}_contrast',
+                                     index=0 if current_spec['Match contrast'] == 'No' else 1)
+            lum = cols_ga[1].radio(label='Match luminance', options=['No', 'Yes'], key=f'{i}_luminance',
+                                   index=0 if current_spec['Match luminance'] == 'No' else 1)
 
-    # TODO: temporaly store results to be picked up by other modules
+            submitted = st.form_submit_button(label="Submit")
+            if submitted:
+                spec = {'Object name': obj_name}
 
-    return
+                if size_random:
+                    spec['Object size'] = 'Random'
+                else:
+                    spec['Object size'] = [size_min, size_max]
 
+                spec['Visual attributes'] = vis_att.split(';')
 
-def get_object_info(i):
-    st.subheader(f'Object {i}')
+                if loc_random:
+                    spec['Location'] = 'Random'
+                else:
+                    spec['Location'] = loc.split(';')
 
-    # Define object_name
-    st.session_state['obj_name'] = st.text_input(
-        'Name of object', value=st.session_state['obj_name'], 
-        key=f'{i}_obj_name'
-    )
+                spec['Match contrast'] = contr
+                spec['Match luminance'] = lum
 
-    # Define size
-    st.markdown('__Size__')
-    cols_s = st.columns(3)
-    st.session_state['size_random'] = cols_s[0].checkbox(
-        "Random", value=st.session_state['size_random'], key=f'{i}_rand_size'
-    )
-    st.session_state['size_min'] = cols_s[1].number_input(
-        'Min occupancy (%)', min_value=0, max_value=100, 
-        value=st.session_state['size_min'], step=5, key=f'{i}_min_size'
-    )
-    st.session_state['size_max'] = cols_s[2].number_input(
-        'Max occupancy (%)', min_value=st.session_state['size_min'], 
-        max_value=100, value=st.session_state['size_max'], 
-        step=5, key=f'{i}_max_size'
-    )
+                st.session_state['specs'][i] = spec
+                st.experimental_rerun()
+    # print the specs for debugging
+    st.write(st.session_state['specs'])
 
-    # Define visual attributes
-    st.markdown('__Visual Attributes__')
-    st.session_state['vis_att'] = st.text_input(
-        label='List of attributes separated by ";"', 
-        value=st.session_state['vis_att'] , key=f'{i}_vis_att'
-    )
-
-    # Define location
-    st.markdown('__Location__')
-    cols_l = st.columns(2)
-    st.session_state['loc_random'] = cols_l[0].checkbox(
-        "Random", value=st.session_state['loc_random'], key=f'{i}_rand_loc'
-    )
-    st.session_state['loc'] = cols_l[1].text_input(
-        label='List of attributes for location separated by ";"', 
-        value=st.session_state['loc'], key=f'{i}_loc'
-    )
-
-    # Define global visual attributes
-    yes_no_dict = {'No': 0, 'Yes': 1}
-
-    st.markdown('__Global attributes__')
-    cols_ga = st.columns(2)
-    st.session_state['contr'] = cols_ga[0].radio(
-        label='Match Contrast', options=['No', 'Yes'], 
-        index=yes_no_dict[st.session_state['contr']], key=f'{i}_contrast'
-    )
-    st.session_state['lum'] = cols_ga[1].radio(
-        label='Match luminance', options=['No', 'Yes'],
-        index=yes_no_dict[st.session_state['lum']], key=f'{i}_luminance'
-    )
-
-    # Submit
-    st.write(st.session_state['i'])
-    submitted = st.button(label="Submit")
-    if submitted:
-        store_info()
-        for i in range(1, st.session_state['i']):
-            df = pd.DataFrame.from_dict(st.session_state[f'results_{i}'])
-            df = df.rename(index={0: f'Object {i}'})
-            st.dataframe(df)
-        st.session_state['i'] += 1
-        st.write(st.session_state['i'])
-        reset_values()
-        get_object_info(st.session_state['i'])
-
-
-if __name__ == '__main__':    
-    st.title('DatGen')
-    st.markdown('_Build your own Image Datasets._')
-
-    if 'i' not in st.session_state:
-        st.session_state['i'] = 1
-        reset_values()
-    
-    get_object_info(st.session_state['i'])
-
-
-## TODO: contrast and luminance should be matched outside of loop
