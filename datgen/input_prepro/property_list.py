@@ -1,25 +1,18 @@
 from pathlib import Path
 
+
 from datgen.input_prepro.utils import get_inputs
 
 
 def create_property_list():
     inputs = get_inputs()
 
-    all_inputs = []
-    obj_only = []
+    for obj, obj_vals in inputs.items():
+        obj_name = obj_vals['obj_name'].lower()
+        vis_att = [a.lower() for a in obj_vals['vis_att'].split(';')]
+        loc = [l.lower() for l in obj_vals['loc'].split(';')]
 
-
+        inputs[obj]['obj_name'] = obj_name
+        print('done')
 
     return p_list
-
-
-def load_coco_captions(annotations_path, partition='train'):
-    captions_path = Path(annotations_path) / f'coco_{partition}2017_captions.json'
-    coco_caps = COCO(captions_path)
-    ann_ids = coco_caps.getAnnIds(imgIds=[], iscrowd=None)
-    captions = []
-    for ann_id in ann_ids:
-        caption = coco_caps.loadAnns(ann_id)[0]['caption']
-        captions.append(caption)
-    return captions
