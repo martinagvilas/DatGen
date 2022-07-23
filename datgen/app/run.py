@@ -3,12 +3,10 @@ import argparse
 
 # initial specification formula
 init_spec = {
-    'Object name': '',
-    'Object size': 50,
-    'Visual attributes': [''],
-    'Location': [''],
-    'Match contrast': 'No',
-    'Match luminance': 'No',
+    'name': '',
+    'size': 50,
+    'visual attributes': '',
+    'location': ''
 }
 
 
@@ -69,38 +67,28 @@ if __name__ == '__main__':
         with form:
             # Define object
             name = st.text_input('Name of object', key=f'{i}_obj_name',
-                                 value=current_spec['Object name'])
+                                 value=current_spec['name'])
 
             # Define size
-            size = st.number_input('Minimum occupancy of object (%)', help='(...). Example:',
-                                   min_value=0, max_value=100, step=5, key=f'{i}_min_size',
-                                   value=current_spec['Object size'])
+            size = st.number_input('Minimum occupancy of object (%)', min_value=0,
+                                   max_value=100, step=5, key=f'{i}_min_size',
+                                   value=current_spec['size'], help='(...). Example:')
             # Define visual attributes
-            st.markdown('__Visual Attributes__')
-            vis_att = st.text_input(
-                label='List of attributes separated by ";"', key=f'{i}_vis_att',
-                value='' if current_spec['Visual attributes'] == 'Random' else ';'.join(
-                    current_spec['Visual attributes']))
+            vis_att = st.text_input('Visual attributes of the object (separated by ";")', key=f'{i}_vis_att',
+                                    value=current_spec['visual attributes'], help='(...). Example:')
 
             # Define location
-            loc = st.text_input('Location/s of the object (separated by ";")', key=f'{i}_loc', help='(...). Example:',
-                                value=current_spec['Location'])
-            # Define global visual attributes
-            st.markdown('__Global attributes__')
-            cols_ga = st.columns(2)
-            contr = cols_ga[0].radio(label='Match Contrast', options=['No', 'Yes'], key=f'{i}_contrast',
-                                     index=0 if current_spec['Match contrast'] == 'No' else 1)
-            lum = cols_ga[1].radio(label='Match luminance', options=['No', 'Yes'], key=f'{i}_luminance',
-                                   index=0 if current_spec['Match luminance'] == 'No' else 1)
+            loc = st.text_input('Location/s of the object (separated by ";")', key=f'{i}_loc',
+                                value=current_spec['location'], help='(...). Example:')
 
             submitted = st.form_submit_button(label="Submit")
             if submitted:
-                spec = {'Object name': name,
-                        'Object size': size,
-                        'Visual attributes': vis_att.split(';'),
-                        'Location': loc.split(';'),
-                        'Match contrast': contr, 'Match luminance': lum}
+                spec = {'name': name,
+                        'size': size,
+                        'visual attributes': vis_att,
+                        'location': loc}
                 st.session_state['specs'][i] = spec
                 st.experimental_rerun()
-# print the specs for debugging
-st.write(st.session_state['specs'])
+
+    # print the specs for debugging
+    st.write(st.session_state['specs'])
