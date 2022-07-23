@@ -1,95 +1,96 @@
 import streamlit as st
-import pandas as pd
+import argparse
 
-## TODO: add help in each input
-
-
-def reset_values():
-    st.session_state['i'] = 1
-    st.session_state['obj_name'] = ''
-    st.session_state['size_min'] = 50
-    st.session_state['vis_att'] = ''
-    st.session_state['loc'] = ''
+# initial specification formula
+init_spec = {
+    'name': '',
+    'size': 50,
+    'visual attributes': [''],
+    'location': ['']
+}
 
 
-def store_info():
-    res_info = {}
-    res_info['Object name'] = st.session_state['obj_name'] 
-    res_info['Object size'] = st.session_state['size_min']
-    res_info['Visual attributes'] = st.session_state['vis_att'].split(';')
-    res_info['Location'] = st.session_state['loc'].split(';')
-    st.session_state['results']['i'] = res_info
-
-    # TODO: store results to be picked up by other modules
-
-    return
+# convert chosen spec name to index
+def get_chosen_spec_index():
+    return int(st.session_state['chosen_spec'][7:])
 
 
-def get_object_info(i):
+# callback for button "Add"
+def add_spec():
+    st.session_state['specs'].append(init_spec)
+    st.session_state['chosen_spec'] = 'Object ' + str(len(st.session_state['specs']) - 1)
+
+
+# callback for button "Remove"
+def remove_spec():
+    if len(st.session_state['specs']) > 1:
+        st.session_state['specs'].pop(get_chosen_spec_index())
+        st.session_state['chosen_spec'] = 'Object 0'
+    else:
+        st.session_state['specs'] = [init_spec]
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--max_n_spec', default=20, choices=range(50), type=int)
+    args = parser.parse_args()
+
+    # define font size for later use
+    st.markdown("""
+                <style>
+                .big-font {
+                    font-size:80px;
+                }
+                .medium-font{
+                    font-size:50px;
+                }
+                </style>
+                """, unsafe_allow_html=True)
+
+    # Session states initialization
+    if 'specs' not in st.session_state:
+        st.session_state['specs'] = [init_spec]
+        st.session_state['chosen_spec'] = 'Object 0'
+
+    # sidebar initialization
+    with st.sidebar:
+        st.markdown('<p class="big-font">DatGen</p>', unsafe_allow_html=True)
+        st.markdown('_Build your own Image Datasets._')
+        st.title('Specifications')
+        col1, col2, _, _, _ = st.columns(5, gap='small')
+        col1.button('Add', on_click=add_spec)
+        col2.button('Remove', on_click=remove_spec)
+        st.radio(label='📌 your objects here', key='chosen_spec',
+                 index=get_chosen_spec_index(),
+                 options=[f'Object {i}' for i in range(len(st.session_state['specs']))])
+
+    i = get_chosen_spec_index()
+    current_spec = st.session_state['specs'][i]
     st.subheader(f'Object {i}')
 
-    # Define object_name
-    st.session_state['obj_name'] = st.text_input(
-        'Name of object', value=st.session_state['obj_name'], 
-        key=f'{i}_obj_name',
-        help='(...). Example:'
-    )
+    # Define object
+    name = st.text_input('Name of object', key=f'{i}_obj_name',
+                         value=current_spec['name'])
 
     # Define size
-    st.session_state['size_min'] = st.number_input(
-        'Minimum occupancy of object (%)', min_value=0, max_value=100, 
-        value=st.session_state['size_min'], step=5, key=f'{i}_min_size',
-        help='(...). Example:'
-    )
-
+    size = st.number_input('Minimum occupancy of object (%)', min_value=0,
+                           max_value=100, step=5, key=f'{i}_min_size',
+                           value=current_spec['size'], help='(...). Example:')
     # Define visual attributes
-    st.session_state['vis_att'] = st.text_input(
-        label='Visual attributes of the object (separated by ";")', 
-        value=st.session_state['vis_att'] , key=f'{i}_vis_att',
-        help='(...). Example:'
-    )
+    vis_att = st.text_input('Visual attributes of the object (separated by ";")', key=f'{i}_vis_att',
+                            value=';'.join(current_spec['visual attributes']), help='(...). Example:')
 
     # Define location
-    st.session_state['loc'] = st.text_input(
-        label='Location/s of the object (separated by ";")', 
-        value=st.session_state['loc'], key=f'{i}_loc',
-        help='(...). Example:'
-    )
+    loc = st.text_input('Location/s of the object (separated by ";")', key=f'{i}_loc',
+                        value=';'.join(current_spec['location']), help='(...). Example:')
 
-    # Submit
-    submitted = st.button(label="Submit")
-    if submitted:
-        store_info()
-        reset_values()
-        st.session_state['i'] += 1
-        st.write(st.session_state['i'])
-        #get_object_info(st.session_state['i'])
-        submitted = False
+    saved = st.button(label="Save")
+    if saved:
+        spec = {'name': name,
+                'size': size,
+                'visual attributes': vis_att.split(';'),
+                'location': loc.split(';')}
+        st.session_state['specs'][i] = spec
 
-
-if __name__ == '__main__':    
-    st.title('DatGen')
-    st.markdown('_Build your own Image Datasets._')
-
-    if 'i' not in st.session_state:
-        st.session_state['i'] = 1
-        st.session_state['results'] = {}
-        reset_values()
-    
-    get_object_info(st.session_state['i'])
-
-
-## TODO: contrast and luminance should be matched outside of loop
-    # # Define global visual attributes
-    # yes_no_dict = {'No': 0, 'Yes': 1}
-
-    # st.markdown('__Global attributes__')
-    # cols_ga = st.columns(2)
-    # st.session_state['contr'] = cols_ga[0].radio(
-    #     label='Match Contrast', options=['No', 'Yes'], 
-    #     index=yes_no_dict[st.session_state['contr']], key=f'{i}_contrast'
-    # )
-    # st.session_state['lum'] = cols_ga[1].radio(
-    #     label='Match luminance', options=['No', 'Yes'],
-    #     index=yes_no_dict[st.session_state['lum']], key=f'{i}_luminance'
-    # )
+    # print the specs for debugging
+    st.write(st.session_state['specs'])
