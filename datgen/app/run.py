@@ -8,7 +8,7 @@ def reset_values():
     st.session_state['i'] = 1
     st.session_state['obj_name'] = ''
     st.session_state['size_min'] = 50
-    st.session_state['vis_att'] = ''
+    st.session_state['vis_attr'] = ''
     st.session_state['loc'] = ''
 
 
