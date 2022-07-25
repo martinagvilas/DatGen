@@ -6,7 +6,7 @@ import pandas as pd
 
 def reset_values():
     st.session_state['i'] = 1
-    st.session_state['obj_name'] = ''
+    st.session_state['obj'] = ''
     st.session_state['size_min'] = 50
     st.session_state['vis_attr'] = ''
     st.session_state['loc'] = ''
@@ -14,7 +14,7 @@ def reset_values():
 
 def store_info():
     res_info = {}
-    res_info['Object name'] = st.session_state['obj_name'] 
+    res_info['Object name'] = st.session_state['obj'] 
     res_info['Object size'] = st.session_state['size_min']
     res_info['Visual attributes'] = st.session_state['vis_att'].split(';')
     res_info['Location'] = st.session_state['loc'].split(';')
