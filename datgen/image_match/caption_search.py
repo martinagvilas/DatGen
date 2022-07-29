@@ -2,10 +2,12 @@ from pathlib import Path
 from pycocotools.coco import COCO
 
 
-ANNOT_PATH = Path()
+ANNOT_PATH = Path('/Users/m_vilas/projects/multimodal-ck/dataset/annotations')
 
 
-def search_captions(input):
+def search_captions(inputs):
+    coco_captions = load_coco_captions()
+    print('done')
 
     return imgs_ids
 
