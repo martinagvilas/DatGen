@@ -53,7 +53,7 @@ if __name__ == '__main__':
     parser.add_argument('-rp', action='store', required=True)
     parser.add_argument('-idx', action='store', required=False)
     dataset = parser.parse_args().d
-    images_path = Path(parser.parse_args().dp)
+    images_path = Path(parser.parse_args().ip)
     results_path = Path(parser.parse_args().rp)
     batch_idx = parser.parse_args().idx
 
