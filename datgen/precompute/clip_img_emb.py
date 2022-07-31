@@ -1,24 +1,23 @@
 import argparse
 from pathlib import Path
+from this import d
 from PIL import Image
 
 import clip
 import torch
 
 
-def compute_clip_image_embeddings(dataset, dataset_path, res_path, batch_idx):
+def compute_clip_image_embeddings(dataset, images_path, res_path, batch_idx):
     res_path = Path(res_path) / 'clip_image_embeddings'
     res_path.mkdir(parents=True, exist_ok=True)
-    if dataset == 'vg':
-        imgs_paths = get_vg_img_paths(dataset_path, batch_idx)
+    imgs_paths = get_img_paths(Path(images_path), batch_idx)
     for img_path in imgs_paths:
         img_ft = compute_img_emb(img_path)
         torch.save(img_ft, (res_path / f'{img_path.stem}.pt'))
     return
 
 
-def get_vg_img_paths(dataset_path, batch_idx):
-    img_path = Path(dataset_path) / 'images'
+def get_img_paths(img_path, batch_idx):
     imgs_paths = list(img_path.glob("*.jpg"))
     if batch_idx != None:
         imgs_paths = get_batch_imgs(imgs_paths, batch_idx)
@@ -50,12 +49,12 @@ def compute_img_emb(img_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', action='store', required=True)
-    parser.add_argument('-dp', action='store', required=True)
+    parser.add_argument('-ip', action='store', required=True)
     parser.add_argument('-rp', action='store', required=True)
     parser.add_argument('-idx', action='store', required=False)
     dataset = parser.parse_args().d
-    dataset_path = Path(parser.parse_args().dp)
+    images_path = Path(parser.parse_args().dp)
     results_path = Path(parser.parse_args().rp)
     batch_idx = parser.parse_args().idx
 
-    compute_clip_image_embeddings(dataset, dataset_path, results_path, batch_idx)
+    compute_clip_image_embeddings(dataset, images_path, results_path, batch_idx)
