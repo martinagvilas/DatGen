@@ -8,12 +8,12 @@ import torch
 
 
 def compute_clip_image_embeddings(dataset, images_path, res_path, batch_idx):
-    res_path = Path(res_path) / 'clip_image_embeddings'
+    res_path = Path(res_path) / 'clip_image_embeddings' / dataset
     res_path.mkdir(parents=True, exist_ok=True)
     imgs_paths = get_img_paths(Path(images_path), batch_idx)
     for img_path in imgs_paths:
         img_ft = compute_img_emb(img_path)
-        torch.save(img_ft, (res_path / dataset / f'{img_path.stem}.pt'))
+        torch.save(img_ft, (res_path / f'{img_path.stem}.pt'))
     return
 
 
