@@ -8,12 +8,22 @@ import torch
 
 
 def compute_clip_image_embeddings(dataset, images_path, res_path, batch_idx):
+    
+    device='cpu'
+    model, prepro = clip.load('ViT-B/32', device)
+    model.to(device)
+    
     res_path = Path(res_path) / 'clip_image_embeddings' / dataset
     res_path.mkdir(parents=True, exist_ok=True)
     imgs_paths = get_img_paths(Path(images_path), batch_idx)
+    
     for img_path in imgs_paths:
-        img_ft = compute_img_emb(img_path)
-        torch.save(img_ft, (res_path / f'{img_path.stem}.pt'))
+        img_ft_file = res_path / f'{img_path.stem}.pt'
+        if img_ft_file.is_file():
+            continue
+        else:
+            img_ft = compute_img_emb(img_path, model, prepro)
+            torch.save(img_ft)
     return
 
 
@@ -35,10 +45,7 @@ def get_batch_imgs(imgs_ids, batch_id):
     return imgs_ids
 
 
-def compute_img_emb(img_path):
-    device='cpu'
-    model, prepro = clip.load('ViT-B/32', device)
-    model.to(device)
+def compute_img_emb(img_path, model, prepro):
     img = Image.open(img_path).convert('RGB')
     img_prepro = torch.unsqueeze(prepro(img), dim=0)
     with torch.no_grad():
