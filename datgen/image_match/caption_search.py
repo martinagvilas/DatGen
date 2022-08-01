@@ -1,24 +1,33 @@
 from pathlib import Path
-from pycocotools.coco import COCO
+
+import pandas as pd
 
 
-ANNOT_PATH = Path('/Users/m_vilas/projects/multimodal-ck/dataset/annotations')
+ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/')
 
 
 def search_captions(inputs):
-    coco_captions = load_coco_captions()
+    cc_labels = pd.read_csv(ANNOT_PATH/'classification_data.csv')[['file', 'tags']]
+    cc_labels = cc_labels.dropna()
+    for obj, obj_vals in inputs.items():
+        obj_name = obj_vals['obj']
+        imgs = get_cc_object_info(obj_name, cc_labels)
     print('done')
 
     return imgs_ids
 
 
-def load_coco_captions():
-    # TODO: both for training and testing data
-    captions_path = ANNOT_PATH / f'coco_train2017_captions.json'
-    coco_caps = COCO(captions_path)
-    ann_ids = coco_caps.getAnnIds(imgIds=[], iscrowd=None)
-    captions = []
-    for ann_id in ann_ids:
-        caption = coco_caps.loadAnns(ann_id)[0]['caption']
-        captions.append(caption)
-    return captions
+def get_cc_object_info(obj, labels):
+    captions_file = ANNOT_PATH / f'cc_training_captions.csv'
+    captions = pd.read_csv(captions_file, sep=',')
+
+    # Look by tag
+    imgs_ids_tag = labels.loc[labels['tags'].str.contains(obj)]['file']
+    # Look by word
+    imgs_ids_captions = captions.loc[captions['caption'].str.contains(obj)]['file']
+    # Get unique values
+    imgs_ids = list(set(imgs_ids_tag.tolist() + imgs_ids_captions.tolist()))
+    # Get object info
+    object_info = captions.loc[captions['file'].isin(imgs_ids)]
+
+    return object_info
