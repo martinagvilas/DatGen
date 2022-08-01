@@ -23,7 +23,7 @@ def compute_clip_image_embeddings(dataset, images_path, res_path, batch_idx):
             continue
         else:
             img_ft = compute_img_emb(img_path, model, prepro)
-            torch.save(img_ft)
+            torch.save(img_ft, img_ft_file)
     return
 
 
