@@ -19,7 +19,6 @@ def compute_clip_image_embeddings(dataset, images_path, res_path, batch_idx):
     
     for img_path in imgs_paths:
         img_ft_file = res_path / f'{img_path.stem}.pt'
-        img_path = Path('/Users/m_vilas/Downloads/VG_100K_2/2402944.jpg')
         if img_ft_file.is_file():
             continue
         else:
