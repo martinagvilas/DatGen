@@ -5,15 +5,15 @@ def get_inputs():
     
     input_info[0]['obj'] = 'Apple'
     input_info[0]['size_min'] = 50
-    #input_info[0]['vis_attr'] = 'red'.split(';')
-    input_info[0]['vis_attr'] = ''
-    input_info[0]['loc'] = ''.split(';')
+    input_info[0]['vis_attr'] = 'red'.split(';')
+    #input_info[0]['vis_attr'] = ''
+    input_info[0]['loc'] = 'table'.split(';')
     input_info[0]['n_images'] = 100
 
     input_info[1]['obj'] = 'pizza'
     input_info[1]['size_min'] = 50
     input_info[1]['vis_attr'] = 'Greasy;round'.split(';')
-    input_info[1]['loc'] = 'table;grocery'.split(';')
+    input_info[1]['loc'] = 'kitchen;plate'.split(';')
     input_info[1]['n_images'] = 100
 
     # Preprocess values
