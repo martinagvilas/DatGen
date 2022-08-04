@@ -1,6 +1,7 @@
 scikit-image
 spacy
 pandas
+pytest
 
 # App
 streamlit
