@@ -4,12 +4,11 @@ from pathlib import Path
 import pandas as pd
 
 
-ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/')
+ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
 
-## Ideas for pre-optimization
+## Ideas for optimization
 # VG: list of objects and only look if object is present
 ## --> same for CC but using labels and words of captions
-
 
 
 def search_annotations(inputs):
@@ -46,7 +45,7 @@ def search_annotations(inputs):
 
 
 def search_cc(inputs):
-    labels = pd.read_csv(ANNOT_PATH/'classification_data.csv')[['file','tags']]
+    labels = pd.read_csv(ANNOT_PATH/'cc/classification_data.csv')[['file','tags']]
     labels = labels.dropna()
     imgs = {}
     for obj, vals in inputs.items():
@@ -66,12 +65,12 @@ def search_cc(inputs):
                     cc_info['caption'].str.contains(vals['loc'][i])
                 ]['file'].tolist() for i in range(len(vals['loc']))
             ]
-            imgs_loc = [i for l in imgs_attr for i in l]
+            imgs_loc = [i for l in imgs_loc for i in l]
         match_imgs = imgs_attr + imgs_loc
-        imgs[obj]['p1'] = [i for i in imgs_attr if i in imgs_loc]
-        imgs[obj]['p2'] = [i for i in match_imgs if i not in imgs[obj]['p1']]
+        imgs[obj]['p1'] = [i.split('.jpg')[0] for i in imgs_attr if i in imgs_loc]
+        imgs[obj]['p2'] = [i.split('.jpg')[0] for i in match_imgs if i not in imgs[obj]['p1']]
         imgs[obj]['p3'] = [
-            i for i in cc_info['file'].tolist() 
+            i.split('.jpg')[0] for i in cc_info['file'].tolist() 
             if (i not in imgs[obj]['p1']) & (i not in imgs[obj]['p2'])
         ]
     return imgs
