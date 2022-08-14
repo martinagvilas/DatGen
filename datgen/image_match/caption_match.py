@@ -11,13 +11,10 @@ from datgen.image_match.annot_search import search_annotations
 
 IMGS_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/images')
 
-# TODO: for loop should be by dataset
-# TODO: define n images
-# TODO: convert priority images into loop
-# TODO: save hihgly matching images
+# TODO: save highly matching images
 ## TODO: reduce number of captions
 
-def compute_match(inputs, n_imgs):
+def compute_match(inputs):
     device='cpu'
     model, _ = clip.load('ViT-B/32', device)
     model.to(device)
@@ -26,24 +23,20 @@ def compute_match(inputs, n_imgs):
     imgs_ids = search_annotations(inputs)
     
     # Check images in annotations
+    imgs = {o: {d: [] for d in imgs_ids.keys()} for o in inputs.keys()}
     for obj in inputs.keys():
-        imgs = {}
+        # Get text features
+        # TODO: change to final captions
+        txt_ft = clip.tokenize(inputs[obj]['captions_obj_attr'])
+        with torch.no_grad():
+            txt_ft = model.encode_text(txt_ft)
+        txt_ft /= txt_ft.norm(dim=-1, keepdim=True)
+        # Get image information
+        n_imgs = inputs[obj]['n_images']
+        # Get images per dataset
         for dataset in imgs_ids.keys():
+            # Get image information from dataset
             dataset_imgs = imgs_ids[dataset][obj]
-            imgs[dataset] = []
-            # Compute caption features
-            captions = inputs[obj]['captions_obj_attr']
-            txt = clip.tokenize(captions)
-            with torch.no_grad():
-                txt_ft = model.encode_text(txt)
-            txt_ft /= txt_ft.norm(dim=-1, keepdim=True)
-                        # Get text embeddings
-            # TODO: change to final captions
-            txt_ft = clip.tokenize(inputs[obj]['captions_obj_attr'])
-            with torch.no_grad():
-                txt_ft = model.encode_text(txt_ft)
-            txt_ft /= txt_ft.norm(dim=-1, keepdim=True)
-            # Get images ids
             p1_imgs = dataset_imgs['p1']
             p2_imgs = dataset_imgs['p2']
             p3_imgs = dataset_imgs['p3']
@@ -55,14 +48,13 @@ def compute_match(inputs, n_imgs):
                 random_ft.append(torch.load(i))
             random_ft = torch.squeeze(torch.stack(random_ft))
             random_ft /= random_ft.norm(dim=-1, keepdim=True)
-
             # Compute priority 1 images match
             # TODO: convert this into for loop for all priorities
-            for prio, imgs_ids in dataset_imgs.items():
-                if imgs_ids == []:
+            for p_imgs in dataset_imgs.values():
+                if p_imgs == []:
                     continue
                 else:
-                    for i in imgs_ids:
+                    for i in p_imgs:
                         # Load image tensor
                         img_ft = torch.load(IMGS_PATH/f'{dataset}' / f'{i}.pt')
                         img_ft /= img_ft.norm(dim=-1, keepdim=True)
@@ -72,12 +64,12 @@ def compute_match(inputs, n_imgs):
                         match = torch.squeeze((img_ft @ txt_ft.T), dim=0)
                         match = torch.mean(match, dim=1)
                         if 0 in match.topk(10)[1]:
-                            imgs[dataset].append(i)
-                        if (len(imgs['cc']) + len(imgs['vg'])) >= n_imgs:
+                            imgs[obj][dataset].append(i)
+                        if (len(imgs[obj]['cc']) + len(imgs[obj]['vg'])) >= n_imgs:
                             break # TODO: check this break works as intender
                         # TODO: save other topk for later inspection
-
-    # Check other images if not annotations
+                print('done')
+    # TODO: Check other images if not annotations
     # get other topk for inspection
     return
 
