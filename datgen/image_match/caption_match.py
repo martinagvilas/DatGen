@@ -11,6 +11,7 @@ from datgen.image_match.annot_search import search_annotations
 
 IMGS_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/images')
 
+# TODO: retrieve all images from first priority first
 # TODO: save highly matching images
 ## TODO: reduce number of captions
 
