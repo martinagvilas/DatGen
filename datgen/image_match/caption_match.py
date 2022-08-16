@@ -81,8 +81,7 @@ def compute_match(inputs):
             else:
                 continue
             break
-        print('done')
-    return
+    return imgs
 
 
 def get_cc_imgs_paths():
