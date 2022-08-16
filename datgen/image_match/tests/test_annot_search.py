@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 
-ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/')
+ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
 
 def fake_data():
     n_objs = 2
