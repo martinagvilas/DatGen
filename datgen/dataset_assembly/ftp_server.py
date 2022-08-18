@@ -10,6 +10,7 @@ def start_fpt_server(Username, Password):
     handler = FTPHandler
 
     handler.permit_foreign_addresses = True
+    handler.permit_privileged_ports = True
     handler.authorizer = authorizer
     handler.banner = "DatGen FTP server"
 
