@@ -6,6 +6,7 @@ import numpy as np
 
 def get_ftp_client(address, port, username, passwd):
     ftp = FTP()
+    ftp.set_pasv(False)
     ftp.connect(address, port)
     ftp.login(username, passwd)
     return ftp
@@ -28,5 +29,5 @@ def retrieve_image(ftp_client, image_path):
 
 
 if __name__ == '__main__':
-    ftp_client = get_ftp_client('141.2.248.135', 60333, 'xiaxu', '12345')
-    img = retrieve_image(ftp_client, 'C_03_03_000.png')
+    ftp_client = get_ftp_client('128.0.145.146', 60666, 'xiaxu', '12345')
+    img = retrieve_image(ftp_client, 'conceptual_captions/my_cat.png')
