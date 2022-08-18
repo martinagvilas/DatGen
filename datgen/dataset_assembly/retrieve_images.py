@@ -28,5 +28,5 @@ def retrieve_image(ftp_client, image_path):
 
 
 if __name__ == '__main__':
-    ftp_client = get_ftp_client('localhost', 2121, 'xiaxu', '12345')
+    ftp_client = get_ftp_client('141.2.248.135', 60333, 'xiaxu', '12345')
     img = retrieve_image(ftp_client, 'C_03_03_000.png')
