@@ -7,6 +7,7 @@
 # Folders
 datasets/
 slurm/
+datgen/image_generation/pretrained
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
