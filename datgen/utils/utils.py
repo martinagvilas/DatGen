@@ -1,29 +1,21 @@
 import io
-import socket
 from PIL import Image
-
-def read_img_from_socket(s):
-    file_size = int(s.recv(2048).decode())
-    img = b''
-    while len(img) < file_size:
-        img += s.recv(2048)
-    pil_img = Image.open(io.BytesIO(img))
-    return pil_img
+import requests
 
 
-def create_server_socket(port=60666):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('0.0.0.0', port))
-    s.listen(5)
-    return s
+def retrieve_img(path):
+    response = requests.get('http://128.0.145.146:60666/' + path)
+    if response.ok:
+        img = Image.open(io.BytesIO(response.content))
+        return img
+    else:
+        return None
 
-def get_client_socket():
-    server_socket = create_server_socket()
-    while True:
-        try:
-            client_socket, addr = server_socket.accept()
-            print(f'{addr} connected!')
-            break
-        except:
-            pass
-    return client_socket
+
+def get_generated_img(prompt):
+    response = requests.post('http://128.0.145.146:60666/', data=prompt)
+    if response.ok:
+        img = Image.open(io.BytesIO(response.content))
+        return img
+    else:
+        return None

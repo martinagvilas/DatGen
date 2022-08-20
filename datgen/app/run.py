@@ -1,6 +1,10 @@
+import os, sys
+
+sys.path.append(os.getcwd())
+
 import streamlit as st
 import argparse
-from datgen.utils.utils import get_client_socket, read_img_from_socket
+from datgen.utils.utils import retrieve_img, get_generated_img
 
 # initial specification formula
 init_spec = {
@@ -64,9 +68,6 @@ if __name__ == '__main__':
         st.session_state['specs'] = [init_spec]
         st.session_state['chosen_spec'] = 'Object 0'
 
-    # Connect to worker client
-    if 'client_socket' not in st.session_state:
-        st.session_state['client_socket'] = get_client_socket()
 
     # sidebar initialization
     with st.sidebar:
@@ -114,11 +115,10 @@ if __name__ == '__main__':
         st.write(st.session_state['specs'])
 
     elif st.session_state['global_state'] == global_state[2]:
-        st.session_state['client_socket'].send('Retrieve:../data/conceptual_captions/1'.encode())
-        img_retrieved = read_img_from_socket(st.session_state['client_socket'])
-        st.image(img_retrieved, caption='Test retrieved img')
+        img_retrieved = retrieve_img('conceptual_captions/2')
+        st.image(img_retrieved, caption='Test retrieving img "The sidewalk near the corner of '
+                                        'streets has one of the few vending machines." ')
 
-        st.session_state['client_socket'].send(
-            'Generate:The sidewalk near the corner of streets has one of the few vending machines'.encode())
-        img_generated = read_img_from_socket(st.session_state['client_socket'])
-        st.image(img_generated, caption='Test generated img')
+        img_generated = get_generated_img('The sidewalk near the corner of streets has one of the few vending machines.')
+        st.image(img_generated, caption='Test generating img "The sidewalk near the corner of '
+                                        'streets has one of the few vending machines." ')
