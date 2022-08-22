@@ -5,6 +5,9 @@ sys.path.append(os.getcwd())
 import streamlit as st
 import argparse
 from datgen.utils.utils import retrieve_img, get_generated_img
+from datgen.input_prepro.property_list import create_property_list
+from datgen.input_prepro.caption_generation import generate_captions
+from datgen.image_match.caption_match import compute_match
 
 # initial specification formula
 init_spec = {
@@ -113,6 +116,13 @@ if __name__ == '__main__':
 
         # print the specs for debugging
         st.write(st.session_state['specs'])
+
+    elif st.session_state['global_state'] == global_state[1]:
+        captions = generate_captions(create_property_list(st.session_state['specs']))
+        imgs_found, captions_left = compute_match(captions)
+        if len(captions_left) > 0:
+            pass
+
 
     elif st.session_state['global_state'] == global_state[2]:
         img_retrieved = retrieve_img('conceptual_captions/2')
