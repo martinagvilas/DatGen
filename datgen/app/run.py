@@ -1,13 +1,16 @@
 import os, sys
+import streamlit as st
+import argparse
+from PIL import Image
+from enum import Enum
 
 sys.path.append(os.getcwd())
 
-import streamlit as st
-import argparse
 from datgen.utils.utils import retrieve_img, get_generated_img
 from datgen.input_prepro.property_list import create_property_list
 from datgen.input_prepro.caption_generation import generate_captions
 from datgen.image_match.caption_match import compute_match
+from datgen.dataset_assembly.assemble import show_images, create_download_button
 
 # initial specification formula
 init_spec = {
@@ -17,7 +20,7 @@ init_spec = {
     'location': ['']
 }
 
-global_state = ['spec_config', 'img_match', 'img_gen', 'data_assem']
+global_state = Enum('global_state', names=['spec_config', 'img_match', 'img_gen', 'data_assem'])
 
 
 # convert chosen spec name to index
@@ -40,9 +43,16 @@ def remove_spec():
         st.session_state['specs'] = [init_spec]
 
 
-# callback for button "DatGen!"
+# callback for button "Generate!"
 def generate_images():
-    st.session_state['global_state'] = global_state[2]
+    st.session_state['global_state'] = global_state.img_gen
+    st.experimental_rerun()
+
+
+# callback for button "Cancel and download"
+def cancel():
+    st.session_state['global_state'] = global_state.data_assem
+    st.experimental_rerun()
 
 
 if __name__ == '__main__':
@@ -64,13 +74,18 @@ if __name__ == '__main__':
 
     # Global state
     if 'global_state' not in st.session_state:
-        st.session_state['global_state'] = global_state[0]
+        st.session_state['global_state'] = global_state.spec_config
 
     # Session states initialization
     if 'specs' not in st.session_state:
         st.session_state['specs'] = [init_spec]
         st.session_state['chosen_spec'] = 'Object 0'
 
+    if 'matching_img_paths' not in st.session_state:
+        st.session_state['matching_img_paths'] = []
+
+    if 'captions_left' not in st.session_state:
+        st.session_state['captions_left'] = []
 
     # sidebar initialization
     with st.sidebar:
@@ -85,7 +100,7 @@ if __name__ == '__main__':
                  options=[f'Object {i}' for i in range(len(st.session_state['specs']))])
         st.button('DatGen!', on_click=generate_images)
 
-    if st.session_state['global_state'] == global_state[0]:
+    if st.session_state['global_state'] == global_state.spec_config:
         i = get_chosen_spec_index()
         current_spec = st.session_state['specs'][i]
         st.subheader(f'Object {i}')
@@ -114,21 +129,44 @@ if __name__ == '__main__':
                     'location': loc.split(';')}
             st.session_state['specs'][i] = spec
 
-        # print the specs for debugging
-        st.write(st.session_state['specs'])
-
-    elif st.session_state['global_state'] == global_state[1]:
+    elif st.session_state['global_state'] == global_state.img_match:
+        st.write('Matching images...')
         captions = generate_captions(create_property_list(st.session_state['specs']))
-        imgs_found, captions_left = compute_match(captions)
+        matching_img_paths, captions_left = compute_match(captions)
+        st.session_state['matching_img_paths'] = matching_img_paths
+        st.session_state['captions_left'] = captions_left
+
+        if len(matching_img_paths) > 0:
+            st.write('Retrieving images...')
+            for i, img_path in enumerate(matching_img_paths):
+                img = retrieve_img(img_path)
+                img.save(f'temp/{i}.png')
+
         if len(captions_left) > 0:
-            pass
+            st.warning(f'Failed to find match for {len(captions_left)} images. '
+                       f'Do you want to generate these images using the Deep generative module? '
+                       f'Estimated time: {len(captions_left) * 4} seconds.')
+            col1, col2 = st.columns(2)
+            with col1:
+                st.button('Generate!', on_click=generate_images)
+            with col2:
+                st.button('Cancel and download.', on_click=generate_images)
+        else:
+            st.session_state['global_state'] = global_state[3]
+            st.experimental_rerun()
 
+    elif st.session_state['global_state'] == global_state.img_gen:
+        captions_left = st.session_state['captions_left']
+        matching_img_paths = st.session_state['matching_img_paths']
+        st.write(f'Generating images... Estimated time: {len(captions_left) * 4} seconds.')
+        for i, caption in enumerate(captions_left):
+            img = get_generated_img(caption)
+            img.save(f'temp/{len(matching_img_paths) + i}.png')
+        st.session_state['global_state'] = global_state[3]
+        st.experimental_rerun()
 
-    elif st.session_state['global_state'] == global_state[2]:
-        img_retrieved = retrieve_img('conceptual_captions/2')
-        st.image(img_retrieved, caption='Test retrieving img "The sidewalk near the corner of '
-                                        'streets has one of the few vending machines." ')
-
-        img_generated = get_generated_img('The sidewalk near the corner of streets has one of the few vending machines.')
-        st.image(img_generated, caption='Test generating img "The sidewalk near the corner of '
-                                        'streets has one of the few vending machines." ')
+    elif st.session_state['global_state'] == global_state.data_assem:
+        st.write('Examples of the dataset:')
+        example_imgs = [Image.open('temp/' + path) for path in os.listdir('temp')]
+        show_images(example_imgs)
+        create_download_button()
