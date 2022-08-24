@@ -8,6 +8,7 @@
 datasets/
 slurm/
 datgen/image_generation/pretrained
+temp/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -141,3 +142,5 @@ dmypy.json
 
 # pycharm project settings
 .idea/
+
+*.zip

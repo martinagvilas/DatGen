@@ -11,7 +11,7 @@ def show_images(imgs, n_imgs_to_show=9, n_per_col=3):
         imgs_chosen = random.sample(imgs, n_imgs_to_show)
     else:
         imgs_chosen = imgs
-    imgs_resized = [img.resize((128, 128)) for img in imgs_chosen]
+    imgs_resized = [img.resize((256, 256)) for img in imgs_chosen]
     n_col = math.ceil(len(imgs_resized) / n_per_col)
     cols = st.columns(n_col)
     count = 0
@@ -26,14 +26,13 @@ def show_images(imgs, n_imgs_to_show=9, n_per_col=3):
 def create_download_button():
     if exists('dataset.zip'):
         os.remove('dataset.zip')
-    with ZipFile('dataset.zip', 'w') as zipped_data:
-        for folderName, subfolders, filenames in os.walk('datgen/temp'):
+    with ZipFile('dataset.zip', 'a') as zipped_data:
+        for folderName, subfolders, filenames in os.walk('temp'):
             for filename in filenames:
                 filePath = os.path.join(folderName, filename)
                 zipped_data.write(filePath, basename(filePath))
-    zipped_data.close()
     file_size = os.path.getsize('dataset.zip') / 1e6
     with open('dataset.zip', 'rb') as f:
         dataset = f.read()
-    st.download_button(f'Download Dataset! Dataset Size:{file_size:>8.4f}', dataset,
-                       file_name='dataset.zip', mime='application/zip')
+    st.write(f'Dataset Size:{file_size:>8.4f}MB.')
+    st.download_button(f'Download Dataset! ', dataset, file_name='dataset.zip', mime='application/zip')

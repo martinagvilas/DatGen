@@ -8,4 +8,3 @@ streamlit
 
 # Models and datasets
 git+https://github.com/openai/CLIP.git
-pycocotools
