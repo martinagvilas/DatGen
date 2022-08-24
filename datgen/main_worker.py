@@ -1,8 +1,9 @@
-from image_generation.generate_image import generate_image
+import argparse
 from http.server import HTTPServer
 from io import BytesIO
 from sauth import SimpleHTTPAuthHandler
-import argparse
+
+from image_generation.generate_image import generate_image
 
 
 class Handler(SimpleHTTPAuthHandler):

@@ -5,7 +5,7 @@ from requests.auth import HTTPBasicAuth
 
 
 def retrieve_img(path, username, password):
-    response = requests.get('http://0.0.0.0:60666/' + path, auth=HTTPBasicAuth(username, password))
+    response = requests.get('http://128.0.145.146:60666/' + path, auth=HTTPBasicAuth(username, password))
     if response.ok:
         img = Image.open(io.BytesIO(response.content))
         return img
@@ -14,7 +14,7 @@ def retrieve_img(path, username, password):
 
 
 def get_generated_img(prompt, username, password):
-    response = requests.post('http://0.0.0.0:60666/', data=prompt, auth=HTTPBasicAuth(username, password))
+    response = requests.post('http://128.0.145.146:60666/', data=prompt, auth=HTTPBasicAuth(username, password))
     if response.ok:
         img = Image.open(io.BytesIO(response.content))
         return img
