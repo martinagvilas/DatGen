@@ -30,7 +30,7 @@ def change_global_state(to=0):
 
 # convert chosen spec name to index
 def get_chosen_spec_index():
-    return int(st.session_state['chosen_spec'][7:])
+    return int(st.session_state['chosen_spec'][7:]) - 1
 
 
 # callback for button "Add"
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     # Session states initialization
     if 'specs' not in st.session_state:
         st.session_state['specs'] = [init_spec]
-        st.session_state['chosen_spec'] = 'Object 0'
+        st.session_state['chosen_spec'] = 'Object 1'
 
     if 'matching_img_paths' not in st.session_state:
         st.session_state['matching_img_paths'] = []
@@ -94,7 +94,7 @@ if __name__ == '__main__':
         col2.button('Remove', on_click=remove_spec)
         st.radio(label='📌 your objects here', key='chosen_spec',
                  index=get_chosen_spec_index(),
-                 options=[f'Object {i}' for i in range(len(st.session_state['specs']))],
+                 options=[f'Object {i + 1}' for i in range(len(st.session_state['specs']))],
                  on_change=lambda: change_global_state(0))
         st.button('DatGen!', on_click=lambda: change_global_state(1))
 

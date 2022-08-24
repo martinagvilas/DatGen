@@ -2,6 +2,12 @@ scikit-image
 spacy
 pandas
 pytest
+Pillow
+requests
+torch
+setuptools
+pycocotools
+sauth
 
 # App
 streamlit
