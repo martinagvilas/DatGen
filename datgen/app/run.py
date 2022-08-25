@@ -16,7 +16,7 @@ from datgen.dataset_assembly.assemble import show_images, create_download_button
 # initial specification formula
 init_spec = {
     'name': '',
-    'size': 50,
+    'size': 10,
     'visual attributes': [''],
     'location': ['']
 }
