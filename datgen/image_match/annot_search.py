@@ -4,8 +4,8 @@ from typing import OrderedDict
 
 import pandas as pd
 
-
 ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
+
 
 ## Ideas for optimization
 # VG: list of objects and only look if object is present
@@ -42,7 +42,7 @@ def search_annotations(inputs):
 
 
 def search_cc(inputs):
-    labels = pd.read_csv(ANNOT_PATH/'cc/classification_data.csv')[['file','tags']]
+    labels = pd.read_csv(ANNOT_PATH / 'cc/classification_data.csv')[['file', 'tags']]
     labels = labels.dropna()
     imgs = {}
     for obj, vals in inputs.items():
@@ -67,15 +67,14 @@ def search_cc(inputs):
         imgs[obj]['p1'] = [i.split('.jpg')[0] for i in imgs_attr if i in imgs_loc]
         imgs[obj]['p2'] = [i.split('.jpg')[0] for i in match_imgs if i not in imgs[obj]['p1']]
         imgs[obj]['p3'] = [
-            i.split('.jpg')[0] for i in cc_info['file'].tolist() 
+            i.split('.jpg')[0] for i in cc_info['file'].tolist()
             if (i not in imgs[obj]['p1']) & (i not in imgs[obj]['p2'])
         ]
     return imgs
 
 
 def get_cc_object_info(obj, labels):
-
-## TODO: search testing captions too
+    ## TODO: search testing captions too
 
     captions_file = ANNOT_PATH / 'cc' / f'cc_training_captions.csv'
     captions = pd.read_csv(captions_file, sep=',')
@@ -99,7 +98,7 @@ def search_vg(inputs):
             obj_info = json.load(f)
     except:
         obj_info = create_vg_obj_dict()
-    
+
     # Search if requested objects are in dataset and if not return empty list
     obj_present = False
     for obj_vals in inputs.values():
@@ -108,7 +107,7 @@ def search_vg(inputs):
             break
     if obj_present == False:
         return []
-    
+
     # Search for attributes
     attr_file = ANNOT_PATH / 'vg' / 'attributes.json'
     with open(attr_file, 'r') as f:
@@ -125,7 +124,7 @@ def search_vg(inputs):
                 for i in img['attributes']:
                     try:
                         if (obj_name in i['names']) & \
-                            (any(a in i['attributes'] for a in obj_attr)):
+                                (any(a in i['attributes'] for a in obj_attr)):
                             imgs_attr.append(img_id)
                     except:
                         continue
@@ -138,7 +137,7 @@ def search_vg(inputs):
         match_imgs = imgs_attr + imgs_loc
         imgs[obj]['p2'] = [i for i in match_imgs if i not in imgs[obj]['p1']]
         imgs[obj]['p3'] = [i for i in imgs_obj if i not in match_imgs]
-    
+
     return imgs
 
 
@@ -152,7 +151,7 @@ def create_vg_obj_dict():
         for obj in img_info['attributes']:
             obj_name = obj['names'][0]
             try:
-                #if img_id not in obj_dict[obj_name]:
+                # if img_id not in obj_dict[obj_name]:
                 obj_dict[obj_name] += [img_id]
             except KeyError:
                 obj_dict[obj_name] = [img_id]

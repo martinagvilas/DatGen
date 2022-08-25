@@ -7,7 +7,6 @@ import torch
 
 from datgen.image_match.annot_search import search_annotations
 
-
 # TODO: add warning to user if not enough images with occupancy are retrieved
 # TODO: use images without occupancy if not enough are found
 
@@ -20,7 +19,7 @@ PRIORITY_IMGS = ['p1', 'p2', 'p3']
 
 
 def compute_match(inputs):
-    device='cpu'
+    device = 'cpu'
     model, _ = clip.load('ViT-B/32', device)
     model.to(device)
 
@@ -71,7 +70,7 @@ def compute_match(inputs):
                     for i in p_imgs:
                         # Load image tensor
                         try:
-                            img_ft = torch.load(IMGS_PATH/f'{dataset}' / f'{i}.pt')
+                            img_ft = torch.load(IMGS_PATH / f'{dataset}' / f'{i}.pt')
                         except:
                             continue
                         img_ft /= img_ft.norm(dim=-1, keepdim=True)
