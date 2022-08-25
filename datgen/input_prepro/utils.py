@@ -4,7 +4,7 @@ def get_inputs():
     input_info = {i: {} for i in range(n_objs)}
     
     input_info[0]['obj'] = 'Apple'
-    input_info[0]['size_min'] = 0.2
+    input_info[0]['size_min'] = 0.1
     input_info[0]['vis_attr'] = 'red'.split(';')
     #input_info[0]['vis_attr'] = ''
     input_info[0]['loc'] = 'table'.split(';')
