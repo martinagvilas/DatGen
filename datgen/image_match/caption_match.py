@@ -7,7 +7,6 @@ import torch
 
 from datgen.image_match.annot_search import search_annotations
 
-
 IMGS_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/images')
 
 CAPTIONS_TYPE = ['all', 'obj', 'loc']
@@ -18,13 +17,13 @@ PRIORITY_IMGS = ['p1', 'p2', 'p3']
 # TODO: save highly matching images
 
 def compute_match(inputs):
-    device='cpu'
+    device = 'cpu'
     model, _ = clip.load('ViT-B/32', device)
     model.to(device)
 
     # Get matching images by annotations
     imgs_ids = search_annotations(inputs)
-    
+
     # Check images in annotations
     imgs = {o: {d: [] for d in imgs_ids.keys()} for o in inputs.keys()}
     for obj in inputs.keys():
@@ -60,7 +59,7 @@ def compute_match(inputs):
                     # Compute match
                     for i in p_imgs:
                         # Load image tensor
-                        img_ft = torch.load(IMGS_PATH/f'{dataset}' / f'{i}.pt')
+                        img_ft = torch.load(IMGS_PATH / f'{dataset}' / f'{i}.pt')
                         img_ft /= img_ft.norm(dim=-1, keepdim=True)
                         # Append image tensor with random images
                         img_ft = torch.vstack([img_ft, random_ft])
