@@ -5,9 +5,10 @@ from datgen.input_prepro.utils import get_inputs
 
 
 if __name__ == '__main__':
-    # Generate inputs
+    # Preprocess inputs for matching
     inputs = get_inputs()
     inputs = create_property_list(inputs)
     inputs = generate_captions(inputs)
 
+    # Compute match
     compute_match(inputs)

@@ -7,14 +7,16 @@ import torch
 
 from datgen.image_match.annot_search import search_annotations
 
+# TODO: add warning to user if not enough images with occupancy are retrieved
+# TODO: use images without occupancy if not enough are found
+
+ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
 IMGS_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/images')
 
 CAPTIONS_TYPE = ['all', 'obj', 'loc']
 
 PRIORITY_IMGS = ['p1', 'p2', 'p3']
 
-
-# TODO: save highly matching images
 
 def compute_match(inputs):
     device = 'cpu'
@@ -24,26 +26,34 @@ def compute_match(inputs):
     # Get matching images by annotations
     imgs_ids = search_annotations(inputs)
 
+    # Load object occupancy
+    occ = {}
+    with open(ANNOT_PATH / 'occ_vg.json', 'r') as f:
+        occ['vg'] = json.load(f)
+    with open(ANNOT_PATH / 'occ_cc.json', 'r') as f:
+        occ['cc'] = json.load(f)
+
     # Check images in annotations
     imgs = {o: {d: [] for d in imgs_ids.keys()} for o in inputs.keys()}
-    for obj in inputs.keys():
+    temp_imgs = {o: {d: [] for d in imgs_ids.keys()} for o in inputs.keys()}
+    for id, obj_info in inputs.items():
         # Get text features
         txt_fts = []
         for c in CAPTIONS_TYPE:
-            captions = inputs[obj][f'captions_{c}']
+            captions = obj_info[f'captions_{c}']
             txt_ft = clip.tokenize(captions)
             with torch.no_grad():
                 txt_ft = model.encode_text(txt_ft)
             txt_ft /= txt_ft.norm(dim=-1, keepdim=True)
             txt_fts.append(txt_ft)
         # Get image information
-        n_imgs = inputs[obj]['n_images']
+        n_imgs = obj_info['n_images']
         # Get images per priority
         for prio in PRIORITY_IMGS:
             # Get images per dataset
             for dataset in imgs_ids.keys():
                 # Get image information from dataset and priority
-                dataset_imgs = imgs_ids[dataset][obj]
+                dataset_imgs = imgs_ids[dataset][id]
                 p_imgs = dataset_imgs[prio]
                 if p_imgs == []:
                     continue
@@ -59,7 +69,10 @@ def compute_match(inputs):
                     # Compute match
                     for i in p_imgs:
                         # Load image tensor
-                        img_ft = torch.load(IMGS_PATH / f'{dataset}' / f'{i}.pt')
+                        try:
+                            img_ft = torch.load(IMGS_PATH / f'{dataset}' / f'{i}.pt')
+                        except:
+                            continue
                         img_ft /= img_ft.norm(dim=-1, keepdim=True)
                         # Append image tensor with random images
                         img_ft = torch.vstack([img_ft, random_ft])
@@ -69,10 +82,20 @@ def compute_match(inputs):
                             match = torch.squeeze((img_ft @ txt_ft.T), dim=0)
                             match = torch.mean(match, dim=1)
                             topk_res.append(match.topk(15)[1])
-                        # Break if all images have been found
+                        # Append image to dataset if it was found 
                         if all(0 in m for m in topk_res):
-                            imgs[obj][dataset].append(i)
-                            if sum(len(v) for v in imgs[obj].values()) >= n_imgs:
+                            # Append to different lists depending on occupancy
+                            try:
+                                for o, v in  occ[dataset][str(i)].items():
+                                    if obj_info['obj'] in o:
+                                        obj_occ = v
+                                        break
+                                if obj_occ >= obj_info['size_min']:
+                                    imgs[id][dataset].append(i)
+                            except:
+                                temp_imgs[id][dataset].append(i)
+                            # Break if all images have been found
+                            if sum(len(v) for v in imgs[id].values()) >= n_imgs:
                                 break
                     else:
                         continue
@@ -84,6 +107,13 @@ def compute_match(inputs):
 
 
 def get_cc_imgs_paths():
+    """_summary_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
     cc_imgs_file = IMGS_PATH / 'cc_imgs.json'
     if not cc_imgs_file.is_file():
         imgs_paths = list((IMGS_PATH / 'cc').iterdir())
@@ -98,6 +128,21 @@ def get_cc_imgs_paths():
 
 
 def get_random_cc_imgs(exclude_ids, n=300):
+    """Get a set of random images IDs from Conceptual Captions that exclude some
+    set of predefined IDs.
+
+    Parameters
+    ----------
+    exclude_ids : list
+        Image IDs to exclude from random generation.
+    n : int, optional
+        Number of random images, by default 300
+
+    Returns
+    -------
+    list
+        Image IDs randomly selected from Conceptual Captions.
+    """
     imgs_paths = get_cc_imgs_paths()
     imgs = []
     while len(imgs) < n:

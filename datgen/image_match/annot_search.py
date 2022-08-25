@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import OrderedDict
 
 import pandas as pd
 
@@ -29,17 +30,13 @@ def search_annotations(inputs):
         specification; "p3" are the images related to the object requested that
         do not match the specifications.
     """
-    imgs_ids = {}
-
-    # Search Conceptual Captions dataset
-    imgs_ids['cc'] = search_cc(inputs)
+    imgs_ids = OrderedDict()
 
     # Search Visual Genome dataset
     imgs_ids['vg'] = search_vg(inputs)
 
-    # TODO: Search Open Images dataset
-
-    ## TODO what happens if empty --> deal with it in caption match?
+    # Search Conceptual Captions dataset
+    imgs_ids['cc'] = search_cc(inputs)
 
     return imgs_ids
 
