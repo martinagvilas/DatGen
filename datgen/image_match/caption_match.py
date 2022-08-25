@@ -1,4 +1,5 @@
 from pathlib import Path
+import pickle
 import json
 import random
 
@@ -8,14 +9,16 @@ import torch
 from datgen.image_match.annot_search import search_annotations
 
 
+# TODO: add warning to user if not enough images with occupancy are retrieved
+# TODO: use images without occupancy if not enough are found
+
+ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
 IMGS_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/images')
 
 CAPTIONS_TYPE = ['all', 'obj', 'loc']
 
 PRIORITY_IMGS = ['p1', 'p2', 'p3']
 
-
-# TODO: save highly matching images
 
 def compute_match(inputs):
     device='cpu'
@@ -24,9 +27,15 @@ def compute_match(inputs):
 
     # Get matching images by annotations
     imgs_ids = search_annotations(inputs)
-    
+
+    # Load CC object occupancy
+    occ = {}
+    with open(ANNOT_PATH / 'cc_occ.json', 'r') as f:
+        occ['cc'] = json.load(f)
+
     # Check images in annotations
     imgs = {o: {d: [] for d in imgs_ids.keys()} for o in inputs.keys()}
+    temp_imgs = {o: {d: [] for d in imgs_ids.keys()} for o in inputs.keys()}
     for obj in inputs.keys():
         # Get text features
         txt_fts = []
@@ -70,9 +79,15 @@ def compute_match(inputs):
                             match = torch.squeeze((img_ft @ txt_ft.T), dim=0)
                             match = torch.mean(match, dim=1)
                             topk_res.append(match.topk(15)[1])
-                        # Break if all images have been found
+                        # Append image to dataset if it was found 
                         if all(0 in m for m in topk_res):
-                            imgs[obj][dataset].append(i)
+                            # Append to different lists depending on occupancy
+                            try:
+                                if occ[dataset][i][obj] >= inputs[obj]['size_min']:
+                                    imgs[obj][dataset].append(i)
+                            except:
+                                temp_imgs[obj[dataset]].append(i)
+                            # Break if all images have been found
                             if sum(len(v) for v in imgs[obj].values()) >= n_imgs:
                                 break
                     else:
