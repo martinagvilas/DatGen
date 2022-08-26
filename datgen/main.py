@@ -1,7 +1,7 @@
-from datgen.image_match.caption_match import compute_match
-from datgen.input_prepro.property_list import create_property_list
-from datgen.input_prepro.caption_generation import generate_captions
-from datgen.input_prepro.utils import get_inputs
+from image_match.caption_match import compute_match
+from input_prepro.property_list import create_property_list
+from input_prepro.caption_generation import generate_captions
+from input_prepro.utils import get_inputs
 
 
 if __name__ == '__main__':

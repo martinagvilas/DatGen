@@ -5,13 +5,13 @@ import random
 import clip
 import torch
 
-from datgen.image_match.annot_search import search_annotations
+from .annot_search import search_annotations
 
 # TODO: add warning to user if not enough images with occupancy are retrieved
 # TODO: use images without occupancy if not enough are found
 
-ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
-IMGS_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/images')
+ANNOT_PATH = Path('../../data/datgen_data/image_metas/annot')
+IMGS_PATH = Path('../../data/datgen_data/image_metas/images')
 
 CAPTIONS_TYPE = ['all', 'obj', 'loc']
 
@@ -123,7 +123,7 @@ def get_cc_imgs_paths():
     else:
         with open(cc_imgs_file, 'r') as f:
             imgs_paths = json.load(f)
-        imgs_paths = [Path(p) for p in imgs_paths]
+        imgs_paths = [IMGS_PATH / '/'.join(p.split('/')[8:]) for p in imgs_paths]
     return imgs_paths
 
 

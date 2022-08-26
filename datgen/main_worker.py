@@ -2,8 +2,11 @@ import argparse
 from http.server import HTTPServer
 from io import BytesIO
 from sauth import SimpleHTTPAuthHandler
+import pickle
 
 from image_generation.generate_image import generate_image
+from image_match.caption_match import compute_match
+from input_prepro.caption_generation import generate_captions
 
 
 class Handler(SimpleHTTPAuthHandler):
@@ -16,12 +19,21 @@ class Handler(SimpleHTTPAuthHandler):
             self.send_response(200)
             self.end_headers()
 
-            prompt = self.rfile.read(int(self.headers['Content-Length'])).decode()
-            print('Generating: ' + prompt)
-            bytes_img = BytesIO()
-            pil_img = generate_image(prompt)
-            pil_img.save(bytes_img, 'PNG')
-            self.wfile.write(bytes_img.getvalue())
+            file_content = self.rfile.read(int(self.headers['Content-Length']))
+            data = pickle.loads(file_content)
+
+            if data['action'] == 'generate':
+                prompt = data['content']
+                print('Generating: ' + prompt)
+                bytes_img = BytesIO()
+                pil_img = generate_image(prompt)
+                pil_img.save(bytes_img, 'PNG')
+                self.wfile.write(bytes_img.getvalue())
+            else:
+                specs = generate_captions(data['content'])
+                match = compute_match(specs)
+                self.wfile.write(pickle.dumps(match))
+
         else:
             self.do_authhead()
             self.wfile.write(auth_header)

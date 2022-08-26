@@ -2,7 +2,7 @@ import torch
 from min_dalle import MinDalle
 
 model = MinDalle(
-    models_root='pretrained',
+    models_root='datgen_data/pretrained',
     dtype=torch.float32,
     device='cuda',
     is_mega=False,

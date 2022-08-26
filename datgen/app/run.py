@@ -10,15 +10,16 @@ import streamlit.elements.utils
 sys.path.append(os.getcwd())
 streamlit.elements.utils._shown_default_value_warning = True
 
-from datgen.utils.utils import retrieve_img, get_generated_img
+from datgen.app.utils import retrieve_img, request_worker
 from datgen.dataset_assembly.assemble import show_images, create_download_button
 
 # initial specification formula
 init_spec = {
-    'name': '',
-    'size': 10,
-    'visual attributes': [''],
-    'location': ['']
+    'obj': '',
+    'size_min': 10,
+    'vis_attr': [''],
+    'loc': [''],
+    'n_images': 1
 }
 
 global_state = ['spec_config', 'img_match', 'img_gen', 'data_assem']
@@ -53,6 +54,7 @@ def remove_spec():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--max_n_spec', default=20, choices=range(50), type=int)
+    parser.add_argument('--max_n_objects_per_spec', default=20, choices=range(50), type=int)
     parser.add_argument('--username', type=str)
     parser.add_argument('--password', type=str)
     args = parser.parse_args()
@@ -104,27 +106,32 @@ if __name__ == '__main__':
         st.subheader(f'Object {i}')
 
         # Define object
-        name = st.text_input('Name of object', key=f'{i}_obj_name',
-                             value=current_spec['name'])
+        obj = st.text_input('Name of object', key=f'{i}_obj',
+                            value=current_spec['obj'])
 
         # Define size
-        size = st.number_input('Minimum occupancy of object (%)', min_value=0,
-                               max_value=100, step=5, key=f'{i}_min_size',
-                               value=current_spec['size'], help='(...). Example:')
+        size_min = st.number_input('Minimum occupancy of object (%)', min_value=0,
+                                   max_value=100, step=5, key=f'{i}_min_size',
+                                   value=current_spec['size_min'], help='(...). Example:')
         # Define visual attributes
-        vis_att = st.text_input('Visual attributes of the object (separated by ";")', key=f'{i}_vis_att',
-                                value=';'.join(current_spec['visual attributes']), help='(...). Example:')
+        vis_attr = st.text_input('Visual attributes of the object (separated by ";")', key=f'{i}_vis_attr',
+                                 value=';'.join(current_spec['vis_attr']), help='(...). Example:')
 
         # Define location
         loc = st.text_input('Location/s of the object (separated by ";")', key=f'{i}_loc',
-                            value=';'.join(current_spec['location']), help='(...). Example:')
+                            value=';'.join(current_spec['loc']), help='(...). Example:')
+
+        # Define number of images
+        n_images = st.number_input('Number of objects', key=f'{i}_n_images',
+                                   min_value=1, max_value=20, value=current_spec['n_images'], help='(...). Example:')
 
         saved = st.button(label="Save")
         if saved:
-            spec = {'name': name,
-                    'size': size,
-                    'visual attributes': vis_att.split(';'),
-                    'location': loc.split(';')}
+            spec = {'obj': obj,
+                    'size_min': size_min,
+                    'vis_attr': vis_attr.split(';'),
+                    'loc': loc.split(';'),
+                    'n_images': int(n_images)}
             st.session_state['specs'][i] = spec
 
     elif st.session_state['global_state'] == global_state[1]:
@@ -170,7 +177,7 @@ if __name__ == '__main__':
         matching_img_paths = st.session_state['matching_img_paths']
         st.write(f'Generating images... Estimated time: {len(captions_left) * 4} seconds.')
         for i, caption in enumerate(captions_left):
-            img = get_generated_img(caption, args.username, args.password)
+            img = request_worker(caption, args.username, args.password)
             img.save(f'temp/{len(matching_img_paths) + i}.png')
         st.session_state['global_state'] = global_state[3]
         st.experimental_rerun()
