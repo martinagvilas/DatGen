@@ -1,10 +1,10 @@
 import json
 from pathlib import Path
-from typing import OrderedDict
+from collections import OrderedDict
 
 import pandas as pd
 
-ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
+ANNOT_PATH = Path('../../data/datgen_data/image_metas/annot')
 
 
 ## Ideas for optimization
