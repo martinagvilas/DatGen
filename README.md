@@ -1,7 +1,9 @@
 # DatGen
 _A web application for creating your own image dataset_
 
-{Description of the problem, solution}
+TODO: Link to website
+
+TODO: Description of the problem, solution
 
 
 ## Installation
@@ -26,5 +28,5 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-## Cite DatGen
-{citation}
+## Acknowledgements
+TODO: streamlit
