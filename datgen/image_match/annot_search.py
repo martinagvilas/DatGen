@@ -1,25 +1,19 @@
 import json
-from pathlib import Path
 from collections import OrderedDict
 
 import pandas as pd
 
-
-## PATH
-current_path = Path().parent.resolve()
-if 'm_vilas' in str(current_path):
-    ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
-else:
-    ANNOT_PATH = Path('../../data/datgen_data/image_metas/annot')
+from datgen.config import ANNOT_PATH
 
 
 def search_annotations(inputs):
-    """_summary_ Searches annotations (captions, labels and other type of annotations)
+    """Search input specification in the annotations of the Visual Genome and
+    Conceptual Captions dataset.
 
     Parameters
     ----------
     inputs : Dict
-        _description_
+        Contains information about each input specification
 
     Returns
     -------
@@ -43,40 +37,54 @@ def search_annotations(inputs):
 
 
 def search_cc(inputs):
-    labels = pd.read_csv(ANNOT_PATH / 'cc/classification_data.csv')[['file', 'tags']]
+    
+    # Load label information
+    labels = pd.read_csv(
+        ANNOT_PATH / 'cc/classification_data.csv'
+    )[['file', 'tags']]
     labels = labels.dropna()
+    
+    # Search inputs
     imgs = {}
     for obj, vals in inputs.items():
-        imgs[obj] = {}
+
+        # Search object
         obj_name = vals['obj']
         cc_info = get_cc_object_info(obj_name, labels)
-        if vals['obj_attr'] != []:
+        cc_info['file'] = cc_info['file'].apply(lambda x: x.split('.jpg')[0])
+        imgs_obj = cc_info['file'].tolist()
+        
+        # Search visual attribute
+        if vals['obj_attr'] != ['']:
             imgs_attr = [
                 cc_info.loc[
                     cc_info['caption'].str.contains(vals['obj_attr'][i])
                 ]['file'].tolist() for i in range(len(vals['obj_attr']))
             ]
             imgs_attr = [i for a in imgs_attr for i in a]
-        if vals['loc'] != []:
+        else:
+            imgs_attr = []
+
+        # Search location
+        if vals['loc'] != ['']:
             imgs_loc = [
                 cc_info.loc[
                     cc_info['caption'].str.contains(vals['loc'][i])
                 ]['file'].tolist() for i in range(len(vals['loc']))
             ]
             imgs_loc = [i for l in imgs_loc for i in l]
-        match_imgs = imgs_attr + imgs_loc
-        imgs[obj]['p1'] = [i.split('.jpg')[0] for i in imgs_attr if i in imgs_loc]
-        imgs[obj]['p2'] = [i.split('.jpg')[0] for i in match_imgs if i not in imgs[obj]['p1']]
-        imgs[obj]['p3'] = [
-            i.split('.jpg')[0] for i in cc_info['file'].tolist()
-            if (i not in imgs[obj]['p1']) & (i not in imgs[obj]['p2'])
-        ]
+        else:
+            imgs_loc = []
+
+        # Divide into priorities
+        imgs[obj] = divide_priorities(vals, imgs_obj, imgs_attr, imgs_loc)
+
     return imgs
 
 
 def get_cc_object_info(obj, labels):
-    ## TODO: search testing captions too
 
+    # Load captions
     captions_file = ANNOT_PATH / 'cc' / f'cc_training_captions.csv'
     captions = pd.read_csv(captions_file, sep=',')
 
@@ -93,34 +101,28 @@ def get_cc_object_info(obj, labels):
 
 
 def search_vg(inputs):
-    # Load object dictionary
+    
+    # Load object information
     try:
         with open((ANNOT_PATH / 'vg' / 'object_info.json'), 'r') as f:
             obj_info = json.load(f)
     except:
         obj_info = create_vg_obj_dict()
 
-    # Search if requested objects are in dataset and if not return empty list
-    obj_present = False
-    for obj_vals in inputs.values():
-        if obj_vals['obj'] in obj_info.keys():
-            obj_present = True
-            break
-    if obj_present == False:
-        return []
-
-    # Search for attributes
+    # Load attribute information
     attr_file = ANNOT_PATH / 'vg' / 'attributes.json'
     with open(attr_file, 'r') as f:
         attr_info = json.load(f)
-    imgs = {}
     
+    # Search inputs
+    imgs = {}
     for obj, vals in inputs.items():    
-        # Look for object information
+        
+        # Search object
         try:
             obj_name = vals['obj']
             imgs_obj = obj_info[obj_name]
-            # Look for attribute information
+            # Search visual attribute
             obj_attr = vals['vis_attr']
             imgs_attr = []
             for img in attr_info:
@@ -138,25 +140,16 @@ def search_vg(inputs):
             imgs_obj = []
             imgs_attr = []
         
-        # Look for location information
+        # Search location
         try:
             imgs_loc = [obj_info[l] for l in vals['loc']]
             imgs_loc = [i for l in imgs_loc for i in l]
         except:
             imgs_loc = []
 
-        # Divide intro priorities
-        imgs[obj] = {}
-        if (vals['vis_attr'] != ['']) and (vals['loc'] != ['']):
-            imgs[obj]['p1'] = [i for i in imgs_attr if i in imgs_loc]
-            match_imgs = imgs_attr + imgs_loc
-            imgs[obj]['p2'] = [i for i in match_imgs if i not in imgs[obj]['p1']]
-            imgs[obj]['p3'] = [i for i in imgs_obj if i not in match_imgs]
-        elif (vals['vis_attr'] != ['']) and (vals['loc'] == ['']):
-            imgs[obj]['p1'] = [i for i in imgs_attr]
-            imgs[obj]['p2'] = [i for i in imgs_obj if i not in imgs[obj]['p1']]
-        elif (vals['vis_attr'] != ['']) and (vals['loc'] == ['']):
-        print('done')
+        # Divide into priorities
+        imgs[obj] = divide_priorities(vals, imgs_obj, imgs_attr, imgs_loc)
+    
     return imgs
 
 
@@ -170,7 +163,6 @@ def create_vg_obj_dict():
         for obj in img_info['attributes']:
             obj_name = obj['names'][0]
             try:
-                # if img_id not in obj_dict[obj_name]:
                 obj_dict[obj_name] += [img_id]
             except KeyError:
                 obj_dict[obj_name] = [img_id]
@@ -179,3 +171,25 @@ def create_vg_obj_dict():
     with open((ANNOT_PATH / 'vg' / 'object_info.json'), 'w') as f:
         json.dump(obj_dict, f)
     return obj_dict
+
+
+def divide_priorities(vals, imgs_obj, imgs_attr, imgs_loc):
+    imgs = {}
+    if (vals['vis_attr'] != ['']) and (vals['loc'] != ['']):
+        imgs['p1'] = [i for i in imgs_attr if i in imgs_loc]
+        match_imgs = imgs_attr + imgs_loc
+        imgs['p2'] = [i for i in match_imgs if i not in imgs['p1']]
+        imgs['p3'] = [i for i in imgs_obj if i not in match_imgs]
+    elif (vals['vis_attr'] != ['']) and (vals['loc'] == ['']):
+        imgs['p1'] = [i for i in imgs_attr]
+        imgs['p2'] = [i for i in imgs_obj if i not in imgs['p1']]
+        imgs['p3'] = []
+    elif (vals['vis_attr'] == ['']) and (vals['loc'] != ['']):
+        imgs['p1'] = [i for i in imgs_loc]
+        imgs['p2'] = [i for i in imgs_obj if i not in imgs['p1']]
+        imgs['p3'] = []
+    else:
+        imgs['p1'] = imgs_obj
+        imgs['p2'] = []
+        imgs['p3'] = []
+    return imgs
