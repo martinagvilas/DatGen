@@ -24,5 +24,5 @@ def fake_data():
     return input_info
 
 
-def test_get_cc_object_info():
-    labels = pd.read_csv(ANNOT_PATH/'classification_data.csv')[['file','tags']]
+# def test_get_cc_object_info():
+#     labels = pd.read_csv(ANNOT_PATH/'classification_data.csv')[['file','tags']]

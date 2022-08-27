@@ -1,5 +1,10 @@
 
 def get_inputs():
+    inputs = get_fake_inputs()
+    return inputs
+
+
+def get_fake_inputs():
     ## IMPORTANT: empty should be of the form [""]
     n_objs = 4
     input_info = {i: {} for i in range(n_objs)}
