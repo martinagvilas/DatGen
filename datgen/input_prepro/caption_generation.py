@@ -1,7 +1,7 @@
 from itertools import product
 
 
-TEMPLATES = [
+PROMPT = [
     '',
     'a photo of',
     #'itap of',
@@ -31,17 +31,17 @@ def generate_captions(inputs):
         ## Attribute captions
         if vals['vis_attr'] != ['']:
             captions.append(clean_captions(
-                [f'{t} {o}' for o, t in product(obj_attr, TEMPLATES)]
+                [f'{t} {o}' for o, t in product(obj_attr, PROMPT)]
             ))
         ## Location captions
         if vals['loc'] != ['']:
             captions.append(clean_captions(
-                [f'{t} {l}' for l, t in product(loc, TEMPLATES)]
+                [f'{t} {l}' for l, t in product(loc, PROMPT)]
             ))
         ## All captions
         if (vals['vis_attr'] != ['']) & (vals['loc'] != ['']):
             captions.append(clean_captions([
-                f'{t} {o} in {l}' for o, l, t in product(obj_attr, loc, TEMPLATES)
+                f'{t} {o} in {l}' for o, l, t in product(obj_attr, loc, PROMPT)
             ]))
         
         inputs[obj]['captions'] = captions

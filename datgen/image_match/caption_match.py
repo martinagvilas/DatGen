@@ -7,9 +7,6 @@ import torch
 from .annot_search import search_annotations
 from datgen.config import ANNOT_PATH, IMGS_PATH
 
-# TODO: add warning to user if not enough images with occupancy are retrieved
-# TODO: use images without occupancy if not enough are found
-
 
 def compute_match(inputs):
     device = 'cpu'
@@ -32,7 +29,7 @@ def compute_match(inputs):
     for id, obj_info in inputs.items():
         # Get text features
         txt_fts = []
-        for captions in obj_info[f'captions']:            
+        for captions in obj_info['captions']:            
             txt_ft = clip.tokenize(captions)
             with torch.no_grad():
                 txt_ft = model.encode_text(txt_ft)
@@ -62,7 +59,8 @@ def compute_match(inputs):
                     for i in p_imgs:
                         # Load image tensor
                         try:
-                            img_ft = torch.load(IMGS_PATH / f'{dataset}' / f'{i}.pt')
+                            img_file = IMGS_PATH / f'{dataset}' / f'{i}.pt'
+                            img_ft = torch.load(img_file)
                         except:
                             continue
                         img_ft /= img_ft.norm(dim=-1, keepdim=True)

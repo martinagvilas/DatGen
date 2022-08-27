@@ -55,7 +55,7 @@ def search_cc(inputs):
         imgs_obj = cc_info['file'].tolist()
         
         # Search visual attribute
-        if vals['obj_attr'] != ['']:
+        if vals['vis_attr'] != ['']:
             imgs_attr = [
                 cc_info.loc[
                     cc_info['caption'].str.contains(vals['obj_attr'][i])
