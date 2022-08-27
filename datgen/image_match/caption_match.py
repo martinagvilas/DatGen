@@ -10,11 +10,18 @@ from .annot_search import search_annotations
 # TODO: add warning to user if not enough images with occupancy are retrieved
 # TODO: use images without occupancy if not enough are found
 
-ANNOT_PATH = Path('../../data/datgen_data/image_metas/annot')
-IMGS_PATH = Path('../../data/datgen_data/image_metas/images')
+
+## PATH
+current_path = Path().parent.resolve()
+if 'm_vilas' in str(current_path):
+    ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
+    IMGS_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/images')
+else:
+    ANNOT_PATH = Path('../../data/datgen_data/image_metas/annot')
+    IMGS_PATH = Path('../../data/datgen_data/image_metas/images')
+
 
 CAPTIONS_TYPE = ['all', 'obj', 'loc']
-
 PRIORITY_IMGS = ['p1', 'p2', 'p3']
 
 
@@ -103,7 +110,7 @@ def compute_match(inputs):
             else:
                 continue
             break
-    return imgs
+    return imgs, inputs
 
 
 def get_cc_imgs_paths():
