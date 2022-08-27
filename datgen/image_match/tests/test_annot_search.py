@@ -1,11 +1,6 @@
 import pytest
 
-from datgen.image_match.annot_search import (
-    divide_priorities
-)
-
-
-# def test_search_vg():
+from datgen.image_match.annot_search import divide_priorities
 
 
 @pytest.mark.parametrize(
@@ -31,8 +26,3 @@ def test_divide_priorities(vis_attr, loc, p1, p2, p3):
     assert imgs['p1'] == p1
     assert imgs['p2'] == p2
     assert imgs['p3'] == p3
-    
-
-
-# def test_get_cc_object_info():
-#     labels = pd.read_csv(ANNOT_PATH/'classification_data.csv')[['file','tags']]

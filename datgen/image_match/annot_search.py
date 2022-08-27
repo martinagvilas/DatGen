@@ -41,7 +41,7 @@ def search_vg(inputs):
 
     Parameters
     ----------
-    inputs : Dict.
+    inputs : dict
         Containing input specifications obtained from website form.
 
     Returns
@@ -169,7 +169,19 @@ def divide_priorities(vals, imgs_obj, imgs_attr, imgs_loc):
 
 
 def search_cc(inputs):
-    
+    """Search Conceptual Captions dataset for input specification.
+
+    Parameters
+    ----------
+    inputs : dict
+        Containing input specifications obtained from website form.
+
+    Returns
+    -------
+    dict
+        Each entry represents an object and its related images IDs divided by
+        priorities.
+    """
     # Load label information
     labels = pd.read_csv(
         ANNOT_PATH / 'cc/classification_data.csv'
@@ -215,7 +227,21 @@ def search_cc(inputs):
 
 
 def get_cc_object_info(obj, labels):
+    """Get images of Conceptual Captions related to object, searching in the
+    labels and captions information.
 
+    Parameters
+    ----------
+    obj : str
+        Name of object to look for.
+    labels : pandas DataFrame
+        Labels of each image in Conceptual Captions.
+
+    Returns
+    -------
+    pandas DataFrame
+       Image information related to object.
+    """
     # Load captions
     captions_file = ANNOT_PATH / 'cc' / f'cc_training_captions.csv'
     captions = pd.read_csv(captions_file, sep=',')
