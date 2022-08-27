@@ -10,11 +10,12 @@ TODO: description on how to use it
 
 
 ## Reporting an issue
-If you find something wrong with DatGen, or if you simply want to leave some
-feedback, submit an [issue](https://github.com/martinagvilas/DatGen/issues).
+If you are experiencing an issue when using DatGen, or 
+you simply want to leave some feedback, 
+please open an [issue](https://github.com/martinagvilas/DatGen/issues).
 
 
-## Install DatGen locally
+## Installing DatGen locally
 1. Clone this repository on your local machine
 ```
 git clone https://github.com/martinagvilas/DatGen.git
@@ -31,10 +32,11 @@ conda activate datgen
 pip install -r requirements.txt
 ```
 
-4. Install software
+4. Install DatGen source code
 ```
 pip install -e .
 ```
 
 ## Acknowledgements
-TODO: streamlit
+DatGen is built on top of [streamlit](https://streamlit.io/),
+an open source tool for building web applications.
