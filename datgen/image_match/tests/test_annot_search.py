@@ -1,28 +1,28 @@
-from pathlib import Path
+import pytest
 
-import pandas as pd
+from datgen.image_match.annot_search import divide_priorities
 
 
-ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
-
-def fake_data():
-    n_objs = 2
-    input_info = {i: {} for i in range(n_objs)}
+@pytest.mark.parametrize(
+    "vis_attr, loc, p1, p2, p3", [
+        ("", "", [1, 2, 4, 5, 7], [], []),
+        ("red", "", [4, 5], [1, 2, 7], []),
+        ("", "store", [5, 7], [1, 2, 4], [6]),
+        ("red", "store", [5], [4], [1, 2, 6, 7])
+    ]
+)
+def test_divide_priorities(vis_attr, loc, p1, p2, p3):
+    # Fake data
+    vals = {}
+    vals['vis_attr'] = [vis_attr]
+    vals['loc'] = [loc]
+    ## Imgs IDs
+    imgs_obj = [1, 2, 4, 5, 7]
+    imgs_attr = [4, 5]
+    imgs_loc = [5, 6, 7]
     
-    input_info[0]['obj'] = 'Apple'
-    input_info[0]['size_min'] = 50
-    input_info[0]['vis_attr'] = 'red'.split(';')
-    input_info[0]['loc'] = 'table'.split(';')
-    input_info[0]['n_images'] = 100
+    imgs = divide_priorities(vals, imgs_obj, imgs_attr, imgs_loc)
 
-    input_info[1]['obj'] = 'pizza'
-    input_info[1]['size_min'] = 50
-    input_info[1]['vis_attr'] = 'Greasy;round'.split(';')
-    input_info[1]['loc'] = 'kitchen;plate'.split(';')
-    input_info[1]['n_images'] = 100
-
-    return input_info
-
-
-def test_get_cc_object_info():
-    labels = pd.read_csv(ANNOT_PATH/'classification_data.csv')[['file','tags']]
+    assert imgs['p1'] == p1
+    assert imgs['p2'] == p2
+    assert imgs['p3'] == p3

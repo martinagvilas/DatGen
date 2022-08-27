@@ -1,4 +1,3 @@
-from pathlib import Path
 import json
 import random
 
@@ -6,23 +5,7 @@ import clip
 import torch
 
 from .annot_search import search_annotations
-
-# TODO: add warning to user if not enough images with occupancy are retrieved
-# TODO: use images without occupancy if not enough are found
-
-
-## PATH
-current_path = Path().parent.resolve()
-if 'm_vilas' in str(current_path):
-    ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
-    IMGS_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/images')
-else:
-    ANNOT_PATH = Path('../../data/datgen_data/image_metas/annot')
-    IMGS_PATH = Path('../../data/datgen_data/image_metas/images')
-
-
-CAPTIONS_TYPE = ['all', 'obj', 'loc']
-PRIORITY_IMGS = ['p1', 'p2', 'p3']
+from datgen.config import ANNOT_PATH, IMGS_PATH
 
 
 def compute_match(inputs):
@@ -46,8 +29,7 @@ def compute_match(inputs):
     for id, obj_info in inputs.items():
         # Get text features
         txt_fts = []
-        for c in CAPTIONS_TYPE:
-            captions = obj_info[f'captions_{c}']
+        for captions in obj_info['captions']:            
             txt_ft = clip.tokenize(captions)
             with torch.no_grad():
                 txt_ft = model.encode_text(txt_ft)
@@ -56,7 +38,7 @@ def compute_match(inputs):
         # Get image information
         n_imgs = obj_info['n_images']
         # Get images per priority
-        for prio in PRIORITY_IMGS:
+        for prio in ['p1', 'p2', 'p3']:
             # Get images per dataset
             for dataset in imgs_ids.keys():
                 # Get image information from dataset and priority
@@ -77,7 +59,8 @@ def compute_match(inputs):
                     for i in p_imgs:
                         # Load image tensor
                         try:
-                            img_ft = torch.load(IMGS_PATH / f'{dataset}' / f'{i}.pt')
+                            img_file = IMGS_PATH / f'{dataset}' / f'{i}.pt'
+                            img_ft = torch.load(img_file)
                         except:
                             continue
                         img_ft /= img_ft.norm(dim=-1, keepdim=True)
