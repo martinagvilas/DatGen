@@ -116,8 +116,17 @@ def search_vg(inputs):
     for obj, vals in inputs.items():
         obj_name = vals['obj']
         obj_attr = vals['vis_attr']
-        imgs_obj = obj_info[obj_name]
-        imgs_attr = []
+        
+        # Continue if object is not present in visual genome database
+        try:
+            imgs_obj = obj_info[obj_name]
+        except:
+            imgs[obj] = {}
+            imgs[obj]['p1'] = []
+            imgs[obj]['p2'] = []
+            imgs[obj]['p3'] = []
+            continue
+        
         for img in attr_info:
             img_id = img['image_id']
             if img_id in imgs_obj:
