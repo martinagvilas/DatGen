@@ -114,41 +114,49 @@ def search_vg(inputs):
     with open(attr_file, 'r') as f:
         attr_info = json.load(f)
     imgs = {}
-    for obj, vals in inputs.items():
-        obj_name = vals['obj']
-        obj_attr = vals['vis_attr']
-        
-        # Continue if object is not present in visual genome database
+    
+    for obj, vals in inputs.items():    
+        # Look for object information
         try:
+            obj_name = vals['obj']
             imgs_obj = obj_info[obj_name]
+            # Look for attribute information
+            obj_attr = vals['vis_attr']
+            imgs_attr = []
+            for img in attr_info:
+                img_id = img['image_id']
+                if img_id in imgs_obj:
+                    for i in img['attributes']:
+                        try:
+                            if (obj_name in i['names']) & \
+                                    (any(a in i['attributes'] for a in obj_attr)):
+                                imgs_attr.append(img_id)
+                        except:
+                            continue
+            imgs_attr = list(set(imgs_attr))
         except:
-            imgs[obj] = {}
-            imgs[obj]['p1'] = []
-            imgs[obj]['p2'] = []
-            imgs[obj]['p3'] = []
-            continue
+            imgs_obj = []
+            imgs_attr = []
         
-        imgs_attr = []
-        for img in attr_info:
-            img_id = img['image_id']
-            if img_id in imgs_obj:
-                for i in img['attributes']:
-                    try:
-                        if (obj_name in i['names']) & \
-                                (any(a in i['attributes'] for a in obj_attr)):
-                            imgs_attr.append(img_id)
-                    except:
-                        continue
-        imgs_attr = list(set(imgs_attr))
-        imgs_loc = [obj_info[l] for l in vals['loc']]
-        imgs_loc = [i for l in imgs_loc for i in l]
+        # Look for location information
+        try:
+            imgs_loc = [obj_info[l] for l in vals['loc']]
+            imgs_loc = [i for l in imgs_loc for i in l]
+        except:
+            imgs_loc = []
 
+        # Divide intro priorities
         imgs[obj] = {}
-        imgs[obj]['p1'] = [i for i in imgs_attr if i in imgs_loc]
-        match_imgs = imgs_attr + imgs_loc
-        imgs[obj]['p2'] = [i for i in match_imgs if i not in imgs[obj]['p1']]
-        imgs[obj]['p3'] = [i for i in imgs_obj if i not in match_imgs]
-
+        if (vals['vis_attr'] != ['']) and (vals['loc'] != ['']):
+            imgs[obj]['p1'] = [i for i in imgs_attr if i in imgs_loc]
+            match_imgs = imgs_attr + imgs_loc
+            imgs[obj]['p2'] = [i for i in match_imgs if i not in imgs[obj]['p1']]
+            imgs[obj]['p3'] = [i for i in imgs_obj if i not in match_imgs]
+        elif (vals['vis_attr'] != ['']) and (vals['loc'] == ['']):
+            imgs[obj]['p1'] = [i for i in imgs_attr]
+            imgs[obj]['p2'] = [i for i in imgs_obj if i not in imgs[obj]['p1']]
+        elif (vals['vis_attr'] != ['']) and (vals['loc'] == ['']):
+        print('done')
     return imgs
 
 

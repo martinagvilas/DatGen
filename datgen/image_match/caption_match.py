@@ -21,7 +21,6 @@ else:
     IMGS_PATH = Path('../../data/datgen_data/image_metas/images')
 
 
-CAPTIONS_TYPE = ['all', 'obj', 'loc']
 PRIORITY_IMGS = ['p1', 'p2', 'p3']
 
 
