@@ -4,12 +4,13 @@ from collections import OrderedDict
 
 import pandas as pd
 
-ANNOT_PATH = Path('../../data/datgen_data/image_metas/annot')
 
-
-## Ideas for optimization
-# VG: list of objects and only look if object is present
-## --> same for CC but using labels and words of captions
+## PATH
+current_path = Path().parent.resolve()
+if 'm_vilas' in str(current_path):
+    ANNOT_PATH = Path('/Users/m_vilas/uni/software_engineering/DatGen/datasets/annot')
+else:
+    ANNOT_PATH = Path('../../data/datgen_data/image_metas/annot')
 
 
 def search_annotations(inputs):
@@ -116,7 +117,17 @@ def search_vg(inputs):
     for obj, vals in inputs.items():
         obj_name = vals['obj']
         obj_attr = vals['vis_attr']
-        imgs_obj = obj_info[obj_name]
+        
+        # Continue if object is not present in visual genome database
+        try:
+            imgs_obj = obj_info[obj_name]
+        except:
+            imgs[obj] = {}
+            imgs[obj]['p1'] = []
+            imgs[obj]['p2'] = []
+            imgs[obj]['p3'] = []
+            continue
+        
         imgs_attr = []
         for img in attr_info:
             img_id = img['image_id']

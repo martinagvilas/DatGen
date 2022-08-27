@@ -1,10 +1,20 @@
 # DatGen
 _A web application for creating your own image dataset_
 
-{Description of the problem, solution}
+
+TODO: Description of the problem, solution
+
+## Using DatGen
+TODO: Link to website
+TODO: description on how to use it 
 
 
-## Installation
+## Reporting an issue
+If you find something wrong with DatGen, or if you simply want to leave some
+feedback, submit an [issue](https://github.com/martinagvilas/DatGen/issues).
+
+
+## Install DatGen locally
 1. Clone this repository on your local machine
 ```
 git clone https://github.com/martinagvilas/DatGen.git
@@ -26,5 +36,5 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-## Cite DatGen
-{citation}
+## Acknowledgements
+TODO: streamlit
