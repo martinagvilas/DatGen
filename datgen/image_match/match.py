@@ -7,7 +7,23 @@ from datgen.image_match.search import search_annot
 
 
 def match(inputs):
+    """Get images from the Visual Genome and Conceptual Captions dataset that
+    highly match the user specifications. Measured using the CLIP multimodal 
+    DNN model.
 
+    Parameters
+    ----------
+    inputs : dict
+        Each object's specification values provided by the user's interaction
+        with the app.
+
+    Returns
+    -------
+    list
+        Classes containing an attribute "matched_imgs" that stores a list with
+        an entry for each image and dataset ID that matches the input
+        specification. 
+    """
     # Search annotations
     searched_objs = search_annot(inputs)
 

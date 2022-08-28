@@ -18,7 +18,7 @@ def search_annot(inputs):
     Returns
     -------
     list of classes
-        Class containing an attribute "annot_id" that stores a dictionary with 
+        Classes containing an attribute "annot_id" that stores a dictionary with 
         an entry for each dataset. Each dataset entry stores the image IDs that 
         are related to the object of interest. Image IDs are ordered into three
         levels of priority: "p1" are the images in the dataset that match all
