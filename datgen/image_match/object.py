@@ -9,12 +9,12 @@ from datgen.input_prepro.object import DGObject
 
 
 class MatchedObject(DGObject):
-    """Object with corresponding annotated images.
+    """Object with corresponding searched and matched images.
 
     Parameters
     ----------
     DGObject : class
-        Object with input specifications
+        Object with preprocessed specification values.
     """
     def __init__(self, vals):
         super(MatchedObject, self).__init__(vals)
@@ -24,6 +24,20 @@ class MatchedObject(DGObject):
     
     
     def search_vg(self, obj_info, attr_info):
+        """Search the Visual Genome dataset for images matching specifications.
+
+        Parameters
+        ----------
+        obj_info : dict
+            Object information of the Visual Genome dataset.
+        attr_info : list
+            Attribute information of the Visual Genome dataset.
+
+        Returns
+        -------
+        dict
+            Image IDs matching inputs categorized by priorities.
+        """
         # Search inputs
         imgs = {}
         # Search object
@@ -37,7 +51,7 @@ class MatchedObject(DGObject):
                     for i in img['attributes']:
                         try:
                             if (self.obj_name in i['names']) & (any(
-                                    a in i['attributes'] for a in self.obj_attr
+                                    a in i['attributes'] for a in self.vis_attr
                             )):
                                 imgs_attr.append(img_id)
                         except:
@@ -62,6 +76,25 @@ class MatchedObject(DGObject):
 
 
     def divide_priorities(self, imgs_obj, imgs_attr, imgs_loc):
+        """Divide images into match priorities.
+
+        Parameters
+        ----------
+        imgs_obj : list
+            Image IDs related to object.
+        imgs_attr : list
+            Image IDs related to object with visual attribute.
+        imgs_loc : list
+            Image IDs related to location.
+
+        Returns
+        -------
+        Dict
+            "p1" are the images in the dataset that match all user
+            specifications; "p2" are the images that match at least one
+            specification; "p3" are the images related to the object requested
+            that do not match the specifications.
+        """
         imgs = {}
         if (self.vis_attr != ['']) and (self.loc != ['']):
             imgs['p1'] = [i for i in imgs_attr if i in imgs_loc]
@@ -70,7 +103,7 @@ class MatchedObject(DGObject):
                 i for i in (imgs_obj + imgs_loc)
                 if (i not in imgs['p1']) & (i not in imgs['p2'])
             ]))
-        elif (self.vis_attr  != ['']) and (self.loc != ['']):
+        elif (self.vis_attr  != ['']) and (self.loc == ['']):
             imgs['p1'] = [i for i in imgs_attr]
             imgs['p2'] = [i for i in imgs_obj if i not in imgs['p1']]
             imgs['p3'] = []
