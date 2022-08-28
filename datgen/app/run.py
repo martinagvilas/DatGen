@@ -13,7 +13,7 @@ sys.path.append(os.getcwd())
 streamlit.elements.utils._shown_default_value_warning = True
 
 from datgen.app.utils import request_worker
-from datgen.dataset_assembly.assemble import show_images, create_download_button
+from datgen.dataset_assembly.assemble import show_images, create_download_button, equalize_contrast
 
 # initial specification formula
 init_spec = {
@@ -155,6 +155,7 @@ if __name__ == '__main__':
             shutil.rmtree('temp')
         os.mkdir('temp')
         os.mkdir('temp/images')
+        os.mkdir('temp/images_equalized')
         with open('temp/specs.json', 'w') as f:
             json.dump(specs, f)
 
@@ -207,7 +208,12 @@ if __name__ == '__main__':
         st.experimental_rerun()
 
     elif st.session_state['global_state'] == global_state[3]:
+        if st.session_state['equalize_img']:
+            equalize_contrast('temp/images/', 'temp/images_equalized/')
+            imgs_dir = 'temp/images_equalized/'
+        else:
+            imgs_dir = 'temp/images/'
         st.write('Examples of the dataset:')
-        example_imgs = [Image.open('temp/images/' + path) for path in os.listdir('temp/images')]
+        example_imgs = [Image.open(imgs_dir + path) for path in os.listdir(imgs_dir)]
         show_images(example_imgs)
         create_download_button()

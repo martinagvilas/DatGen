@@ -40,8 +40,7 @@ def create_download_button():
     st.write(f'Dataset Size:{file_size:>8.4f}MB.')
     st.download_button(f'Download Dataset! ', dataset, file_name='dataset.zip', mime='application/zip')
 
-def equalize_contrast(path):
+def equalize_contrast(path, path_save):
     for img_name in os.listdir(path):
-        img_path = path + img_name
-        img_equilized = exposure.equalize_hist(np.asarray(Image.open(img_path)))
-        Image.fromarray(img_equilized).save(img_path, 'PNG')
+        img_equalized = exposure.equalize_hist(np.asarray(Image.open(path + img_name)))
+        Image.fromarray((img_equalized * 255).astype(np.uint8)).save(path_save + img_name, 'PNG')
