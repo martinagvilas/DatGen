@@ -10,5 +10,5 @@ if 'm_vilas' in str(current_path):
         '/Users/m_vilas/uni/software_engineering/DatGen/datasets/images'
     )
 else:
-    ANNOT_PATH = Path('../../data/datgen_data/image_metas/annot')
-    IMGS_PATH = Path('../../data/datgen_data/image_metas/images')
+    ANNOT_PATH = Path('../data/datgen_data/image_metas/annot')
+    IMGS_PATH = Path('../data/datgen_data/image_metas/images')

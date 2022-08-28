@@ -4,6 +4,9 @@ import os
 from os.path import basename, exists
 import math
 import random
+from PIL import Image
+import numpy as np
+from skimage import exposure
 
 
 def show_images(imgs, n_imgs_to_show=9, n_per_col=3):
@@ -36,3 +39,9 @@ def create_download_button():
         dataset = f.read()
     st.write(f'Dataset Size:{file_size:>8.4f}MB.')
     st.download_button(f'Download Dataset! ', dataset, file_name='dataset.zip', mime='application/zip')
+
+def equalize_contrast(path):
+    for img_name in os.listdir(path):
+        img_path = path + img_name
+        img_equilized = exposure.equalize_hist(np.asarray(Image.open(img_path)))
+        Image.fromarray(img_equilized).save(img_path, 'PNG')

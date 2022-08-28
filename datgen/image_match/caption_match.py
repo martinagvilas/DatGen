@@ -4,7 +4,7 @@ import random
 import clip
 import torch
 
-from .annot_search import search_annotations
+from datgen.image_match.annot_search import search_annotations
 from datgen.config import ANNOT_PATH, IMGS_PATH
 
 
