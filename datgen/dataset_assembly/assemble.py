@@ -26,14 +26,13 @@ def show_images(imgs, n_imgs_to_show=9, n_per_col=3):
                     count += 1
 
 
-def create_download_button():
+def create_download_button(imgs_dir, specs_dir):
     if exists('dataset.zip'):
         os.remove('dataset.zip')
     with ZipFile('dataset.zip', 'a') as zipped_data:
-        for folderName, subfolders, filenames in os.walk('temp'):
-            for filename in filenames:
-                filePath = os.path.join(folderName, filename)
-                zipped_data.write(filePath, basename(filePath))
+        for img_name in os.listdir(imgs_dir):
+            zipped_data.write(imgs_dir + img_name, 'images/' + img_name)
+        zipped_data.write(specs_dir, 'specs.json')
     file_size = os.path.getsize('dataset.zip') / 1e6
     with open('dataset.zip', 'rb') as f:
         dataset = f.read()

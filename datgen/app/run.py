@@ -216,4 +216,4 @@ if __name__ == '__main__':
         st.write('Examples of the dataset:')
         example_imgs = [Image.open(imgs_dir + path) for path in os.listdir(imgs_dir)]
         show_images(example_imgs)
-        create_download_button()
+        create_download_button(imgs_dir, 'temp/specs.json')
