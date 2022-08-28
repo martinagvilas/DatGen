@@ -18,7 +18,13 @@ def search_annot(inputs):
     Returns
     -------
     list of classes
-        Objects with imgs IDs from both datasets that meet the requirements.
+        Class containing an attribute "annot_id" that stores a dictionary with 
+        an entry for each dataset. Each dataset entry stores the image IDs that 
+        are related to the object of interest. Image IDs are ordered into three
+        levels of priority: "p1" are the images in the dataset that match all
+        user specifications; "p2" are the images that match at least one
+        specification; "p3" are the images related to the object requested that
+        do not match the specifications.
     """
     objs = []
     for obj, obj_vals in inputs.items():
@@ -44,6 +50,14 @@ def search_annot(inputs):
 
 
 def load_vg_attr_info():
+    """Load attribute information of the Visual Genome dataset.
+
+    Returns
+    -------
+    Dict
+        Attribute information as decripted here: 
+        https://visualgenome.org/api/v0/api_readme
+    """
     attr_file = ANNOT_PATH / 'vg' / 'attributes.json'
     with open(attr_file, 'r') as f:
         attr_info = json.load(f)
@@ -51,7 +65,7 @@ def load_vg_attr_info():
 
 
 def load_vg_obj_info():
-    """Load dictionary of images per object in the Visual Genome dataset.
+    """Load object information of the Visual Genome dataset.
 
     Returns
     -------
@@ -82,6 +96,13 @@ def load_vg_obj_info():
 
 
 def load_cc_labels():
+    """Load label information of the Conceptual Captions dataset.
+
+    Returns
+    -------
+    pandas DataFrame
+        Each row contains the labels associated with an image ID. 
+    """
     labels = pd.read_csv(ANNOT_PATH / 'cc/classification_data.csv')
     labels = labels[['file', 'tags']]
     labels = labels.dropna()
@@ -89,6 +110,13 @@ def load_cc_labels():
 
 
 def load_cc_captions():
+    """Load caption information of the Conceptual Captions dataset.
+
+    Returns
+    -------
+    pandas DataFrame
+        Each row contains the captions associated with an image ID.
+    """
     captions_file = ANNOT_PATH / 'cc' / f'cc_training_captions.csv'
     captions = pd.read_csv(captions_file, sep=',')
     return captions
