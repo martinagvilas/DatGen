@@ -119,6 +119,21 @@ class MatchedObject(DGObject):
 
 
     def search_cc(self, captions, labels):
+        """Search the Conceptual Captions dataset for images matching
+        specifications.
+
+        Parameters
+        ----------
+        captions : pandas DataFrame
+            Caption information of the Conceptual Captions dataset.
+        labels : pandas DataFrame
+            Caption information of the Conceptual Captions dataset.
+
+        Returns
+        -------
+        dict
+            Image IDs matching inputs categorized by priorities.
+        """
         # Search inputs
         imgs = {}
 
@@ -163,6 +178,20 @@ class MatchedObject(DGObject):
 
 
     def compute_match(self, model, occ):
+        """Get images that match specified captions using CLIP multimodal model.
+
+        Parameters
+        ----------
+        model : pytorch model
+            CLIP with pre-trained parameters.
+        occ : dict
+            Occupancy information for each object and image.
+
+        Returns
+        -------
+        list
+            Lists of [image id, dataset] that match captions.
+        """
         # Get caption embeddings
         txt_fts = []
         for captions in self.captions: 
