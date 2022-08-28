@@ -100,7 +100,7 @@ class MatchedObject(DGObject):
             imgs['p1'] = [i for i in imgs_attr if i in imgs_loc]
             imgs['p2'] = [i for i in imgs_attr if i not in imgs['p1']]
             imgs['p3'] = list(set([
-                i for i in (imgs_obj + imgs_loc)
+                i for i in imgs_obj
                 if (i not in imgs['p1']) & (i not in imgs['p2'])
             ]))
         elif (self.vis_attr  != ['']) and (self.loc == ['']):
@@ -110,7 +110,7 @@ class MatchedObject(DGObject):
         elif (self.vis_attr  == ['']) and (self.loc != ['']):
             imgs['p1'] = [i for i in imgs_loc if i in imgs_obj]
             imgs['p2'] = [i for i in imgs_obj if i not in imgs['p1']]
-            imgs['p3'] = [i for i in imgs_loc if i not in imgs['p1']]
+            imgs['p3'] = []
         else:
             imgs['p1'] = imgs_obj
             imgs['p2'] = []
@@ -140,12 +140,18 @@ class MatchedObject(DGObject):
 
         # Search location
         if self.loc != ['']:
-            imgs_loc = [
+            obj_loc = [
                 cc_info.loc[
                     cc_info['caption'].str.contains(self.loc[i])
                 ]['file'].tolist() for i in range(len(self.loc))
             ]
-            imgs_loc = [i for l in imgs_loc for i in l]
+            obj_loc = [i for l in obj_loc for i in l]
+            loc_obj = [
+                labels.loc[labels['tags'].str.contains(l)]['file'].tolist()
+                for l in self.loc
+            ]
+            loc_obj = [i.split('.jpg')[0] for l in loc_obj for i in l]
+            imgs_loc = list(set(obj_loc + loc_obj))
         else:
             imgs_loc = []
 
@@ -223,6 +229,23 @@ class MatchedObject(DGObject):
 
 
 def get_cc_object_info(obj, captions, labels):
+    """Get information of the images in the Conceptual Captions dataset that
+    match an object.
+
+    Parameters
+    ----------
+    obj : str
+        Object name.
+    captions : pandas DataFrame
+        Caption information of the Conceptual Captions dataset.
+    labels : pandas DataFrame
+        Caption information of the Conceptual Captions dataset.
+
+    Returns
+    -------
+    pandas DataFrame
+        Caption of the images that contain the object.
+    """
     # Search by tag
     imgs_tag = labels.loc[labels['tags'].str.contains(obj)]['file']
     # Search by word
@@ -261,12 +284,12 @@ def get_random_cc_imgs(exclude_ids, n=300):
 
 
 def get_cc_imgs_paths():
-    """_summary_
+    """Get images of Conceptual Captions whose embeddings are precomputed.
 
     Returns
     -------
-    _type_
-        _description_
+    list
+        Image IDs.
     """
     cc_imgs_file = IMGS_PATH / 'cc_imgs.json'
     if not cc_imgs_file.is_file():
