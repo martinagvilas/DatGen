@@ -1,12 +1,13 @@
 import streamlit as st
 from zipfile import ZipFile
 import os
-from os.path import basename, exists
+from os.path import exists
 import math
 import random
 from PIL import Image
 import numpy as np
 from skimage import exposure
+import time
 
 
 def show_images(imgs, n_imgs_to_show=9, n_per_col=3):
@@ -26,18 +27,20 @@ def show_images(imgs, n_imgs_to_show=9, n_per_col=3):
                     count += 1
 
 
-def create_download_button(imgs_dir, specs_dir):
-    if exists('dataset.zip'):
-        os.remove('dataset.zip')
-    with ZipFile('dataset.zip', 'a') as zipped_data:
+def create_download_button(temp_dir, imgs_dir, specs_dir):
+    zip_dir = temp_dir + 'dataset.zip'
+    if exists(zip_dir):
+        os.remove(zip_dir)
+    with ZipFile(zip_dir, 'w') as zipped_data:
         for img_name in os.listdir(imgs_dir):
             zipped_data.write(imgs_dir + img_name, 'images/' + img_name)
         zipped_data.write(specs_dir, 'specs.json')
-    file_size = os.path.getsize('dataset.zip') / 1e6
-    with open('dataset.zip', 'rb') as f:
+    file_size = os.path.getsize(zip_dir) / 1e6
+    with open(zip_dir, 'rb') as f:
         dataset = f.read()
     st.write(f'Dataset Size:{file_size:>8.4f}MB.')
-    st.download_button(f'Download Dataset! ', dataset, file_name='dataset.zip', mime='application/zip')
+    st.download_button(f'Download Dataset! ', dataset, file_name=zip_dir, mime='application/zip')
+
 
 def equalize_contrast(path, path_save):
     for img_name in os.listdir(path):

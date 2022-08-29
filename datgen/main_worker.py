@@ -5,10 +5,8 @@ from sauth import SimpleHTTPAuthHandler
 import pickle
 from pathlib import Path
 
-from datgen.input_prepro.property_list import create_property_list
+from datgen.image_match.match import match
 from datgen.image_generation.generate_image import generate_image
-from datgen.image_match.caption_match import compute_match
-from datgen.input_prepro.caption_generation import generate_captions
 
 
 class Handler(SimpleHTTPAuthHandler):
@@ -35,8 +33,8 @@ class Handler(SimpleHTTPAuthHandler):
                 self.end_headers()
                 print('Matching...')
                 print(data['content'])
-                match = compute_match(generate_captions(create_property_list(data['content'])))
-                self.wfile.write(pickle.dumps(match))
+                match_results = match(data['content'])
+                self.wfile.write(pickle.dumps(match_results))
             else:
                 path = Path('../data/datgen_data/') / data['content']
                 print('Retrieving :' + str(path))

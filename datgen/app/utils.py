@@ -4,7 +4,7 @@ import pickle
 from PIL import Image
 import requests
 from requests.auth import HTTPBasicAuth
-
+from datgen.image_match.object import MatchedObject
 
 def request_worker(action, content, username, password):
     response = requests.post('http://128.0.145.146:60666/', auth=HTTPBasicAuth(username, password),
@@ -14,11 +14,12 @@ def request_worker(action, content, username, password):
             img = Image.open(io.BytesIO(response.content))
             return img
         elif action == 'match':
-            matched, specs = pickle.loads(response.content)
-            for k, v in specs.items():
-                vg_paths = [f'visual_genome/{vg_path}.jpg' for vg_path in matched[k]['vg']]
-                cc_paths = ['conceptual_captions/' + cc_path for cc_path in matched[k]['cc']]
+            matched_objects = pickle.loads(response.content)
+            for i, matched_object in enumerate(matched_objects):
+                vg_paths = [f'visual_genome/{m[0]}.jpg' for m in matched_object.matched_imgs if m[1] == 'vg']
+                cc_paths = [f'conceptual_captions/{m[0]}' for m in matched_object.matched_imgs if m[1] == 'cc']
                 img_paths = vg_paths + cc_paths
+                v = content[i]
                 v['matched_img_paths'] = img_paths
                 caption = 'A photo of '
                 if v['vis_attr'] != ['']:
@@ -27,7 +28,7 @@ def request_worker(action, content, username, password):
                 if v['loc'] != ['']:
                     caption += ' in a ' + ' and '.join(v['loc'])
                 v['caption_gen'] = caption
-            return specs
+            return content
         else:
             img = Image.open(io.BytesIO(response.content))
             return img
