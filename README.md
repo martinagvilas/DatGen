@@ -8,7 +8,7 @@ Use DatGen to:
 - Make use of human annotated public image datasets.
 - Leverage multimodal AI systems capable of detecting and generating images matching your needs.
 
-#### How to use?
+### :wrench: How to use?
 Head over [here]() and start building your dataset. You will be able to choose, using text input and dropdown menus:
 1. The objects that compose your dataset.
 2. Their size with respect to the rest of the image.
