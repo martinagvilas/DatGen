@@ -1,5 +1,10 @@
 # DatGen
+
+![example workflow](https://github.com/martinagvilas/DatGen/actions/workflows/ci.yml/badge.svg)
+
 _A web application for creating your own image dataset_
+
+TODO: Description of the problem, solution
 
 ## Using DatGen
 Use DatGen to:

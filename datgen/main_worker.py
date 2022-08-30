@@ -11,7 +11,11 @@ from datgen.image_generation.generate_image import generate_image
 
 class Handler(SimpleHTTPAuthHandler):
     def do_POST(self):
+        """
+            Overrides the handling of POST HTTP request
+        """
         auth_header = self.headers.get('Authorization', '').encode('ascii')
+        # authentication
         if auth_header is None:
             self.do_authhead()
             self.wfile.write(b'no auth header received')
@@ -20,6 +24,7 @@ class Handler(SimpleHTTPAuthHandler):
             data = pickle.loads(file_content)
 
             if data['action'] == 'generate':
+                # handles the generation
                 self.send_response(200)
                 self.end_headers()
                 prompt = data['content']
@@ -29,6 +34,7 @@ class Handler(SimpleHTTPAuthHandler):
                 pil_img.save(bytes_img, 'PNG')
                 self.wfile.write(bytes_img.getvalue())
             elif data['action'] == 'match':
+                # handles the match
                 self.send_response(200)
                 self.end_headers()
                 print('Matching...')
@@ -36,6 +42,7 @@ class Handler(SimpleHTTPAuthHandler):
                 match_results = match(data['content'])
                 self.wfile.write(pickle.dumps(match_results))
             else:
+                # handles the retrieval
                 path = Path('../data/datgen_data/') / data['content']
                 print('Retrieving :' + str(path))
                 if path.is_file():
@@ -48,6 +55,7 @@ class Handler(SimpleHTTPAuthHandler):
                     self.end_headers()
 
         else:
+            # authentication failed
             self.do_authhead()
             self.wfile.write(auth_header)
             self.wfile.write(b'not authenticated')

@@ -8,6 +8,8 @@ torch
 setuptools
 pycocotools
 sauth
+numpy
+min_dalle
 
 # App
 streamlit
