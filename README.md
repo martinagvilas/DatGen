@@ -1,7 +1,7 @@
 # DatGen
 _A web application for creating your own image dataset_
 
-![Tests](https://github.com/martinagvilas/DatGen/blob/main/.github/workflows/ci.yml/badge.svg)
+![example workflow](https://github.com/martinagvilas/DatGen/actions/workflows/ci.yml/badge.svg)
 
 TODO: Description of the problem, solution
 
