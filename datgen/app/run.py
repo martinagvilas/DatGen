@@ -112,14 +112,14 @@ if __name__ == '__main__':
         st.markdown('<p class="big-font">DatGen</p>', unsafe_allow_html=True)
         st.markdown('_Build your own Image Datasets._')
         st.title('Specifications')
-        col1, col2, _, _, _ = st.columns(5, gap='small')
-        col1.button('Add', on_click=add_spec)
-        col2.button('Remove', on_click=remove_spec)
-        st.radio(label='📌 your objects here', key='chosen_spec',
+        st.radio(label='📌 Choose your objects and properties', key='chosen_spec',
                  index=get_chosen_spec_index(),
                  options=[f'Object {i + 1}' for i in range(len(st.session_state['specs']))],
                  on_change=lambda: change_session_state('global_state', global_state[0]))
-        st.checkbox('Equalize contrast', key='equalize_img')
+        col1, col2, _, _, _ = st.columns(5, gap='small')
+        col1.button('Add', on_click=add_spec)
+        col2.button('Remove', on_click=remove_spec)
+        st.checkbox('Equalize contrast', key='equalize_img', help="Equalize contrast values between images in the final dataset or not.")
         st.button('DatGen!', on_click=lambda: change_session_state('global_state', global_state[1]))
 
     if st.session_state['global_state'] == global_state[0]:
@@ -128,27 +128,47 @@ if __name__ == '__main__':
         st.subheader(f'Object {i + 1}')
 
         # Define object
+        help_obj = f"Name of object you want represented in the dataset. "\
+            "Example: 'apple'. "\
+            "Must be provided and should consist of a unique option. "\
+            "If you want to add other objects, please press the button ADD "\
+            "in the sidebar."
         obj = st.text_input('Name of object', key=f'{i}_obj',
-                            value=current_spec['obj'])
+                            value=current_spec['obj'], help=help_obj)
 
         # Define size
+        help_occ = "Minimum occupancy of the object in the image. Expressed in percentage."
         size_min = st.number_input('Minimum occupancy of object (%)', key=f'{i}_size_min',
                                    min_value=10, max_value=100, step=5,
-                                   value=int(current_spec['size_min'] * 100), help='(...). Example:',
+                                   value=int(current_spec['size_min'] * 100), help=help_occ,
                                    on_change=lambda: set_spec(i, 'size_min', st.session_state[f'{i}_size_min'] / 100))
 
         # Define visual attributes
+        help_vis_attr = "Visual attributes of the object. Example: 'red'. "\
+            "Can be multiple attributes separated by a ';' without space in-between. "\
+            "Example:'red;shiny'. "\
+            "If you provide more than one attribute, images will display "\
+            "the object with either attribute, but not necessarily both."
         vis_attr = st.text_input('Visual attributes of the object (separated by ";")', key=f'{i}_vis_attr',
-                                 value=';'.join(current_spec['vis_attr']), help='(...). Example:')
+                                 value=';'.join(current_spec['vis_attr']), help=help_vis_attr)
 
         # Define location
+        help_loc = "Object location. Example: 'kitchen'. "\
+            "Can be multiple locations separated by a ';' without space in-between. "\
+            "Example: 'kitchen;table'. "\
+            "If you provide more than one location, images will display "\
+            "the object in either location, but not necessarily both."
         loc = st.text_input('Location/s of the object (separated by ";")', key=f'{i}_loc',
-                            value=';'.join(current_spec['loc']), help='(...). Example:')
+                            value=';'.join(current_spec['loc']), help=help_loc)
 
         # Define number of images
+        help_n_imgs = "Number of images to generate containing the input specifications."
         n_images = st.number_input('Number of objects', key=f'{i}_n_images',
-                                   min_value=1, max_value=20, value=current_spec['n_images'], help='(...). Example:',
+                                   min_value=1, max_value=20, value=current_spec['n_images'], help=help_n_imgs,
                                    on_change=lambda: set_spec(i, 'n_images', st.session_state[f'{i}_n_images']))
+
+        st.markdown('_If you want to read more about using DatGen, head to our [github repository](https://github.com/martinagvilas/DatGen)._')
+
 
         save_spec(i, obj, size_min, vis_attr, loc, n_images)
         change_session_state('ignore_blank', False)
