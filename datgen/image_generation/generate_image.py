@@ -12,6 +12,17 @@ model = MinDalle(
 
 
 def generate_image(prompt: str):
+    """
+        Generate an image givin the prompt
+    Parameters
+    ----------
+    prompt: str
+        The prompt used to generate the image
+    Returns
+    -------
+    : PIL image
+        The generated image.
+    """
     if prompt.strip() == '':
         raise ValueError('Empty Input')
     if model is None:

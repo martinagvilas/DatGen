@@ -7,6 +7,25 @@ from requests.auth import HTTPBasicAuth
 
 
 def request_worker(action: str, content, username: str, password: str):
+    """
+        Request the worker
+    Parameters
+    ----------
+    action: str
+        The action for the worker to take. It should be either "generate", "retrieve" or "match"
+    content:
+        The request content. For "generate", this is the prompt; for "retrieve", this is the path of image;
+        for "match", this is the specification dictionary.
+    username: str
+        The username for the HTTP authentication
+    password: str
+        The password for the HTTP authentication
+    Returns
+    -------
+        The result of the request. For "generate", this is the generated image; for "retrieve",
+        this is the retrieved image; for "match", this is the MatchedObject.
+
+    """
     response = requests.post('http://128.0.145.146:60666/', auth=HTTPBasicAuth(username, password),
                              data=pickle.dumps({'action': action, 'content': content}))
 

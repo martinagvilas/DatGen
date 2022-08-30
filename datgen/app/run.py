@@ -24,27 +24,53 @@ INIT_SPEC = {
     'n_images': 1
 }
 
+# global states
 GLOBAL_STATE = ['spec_config', 'img_match', 'img_gen', 'data_assem']
 
 
 def change_session_state(state: str, to):
+    """
+    Change a session state with key: state to: to.
+
+    Parameters
+    ----------
+    state: str
+        the key of the session state
+    to:
+        the value to set
+    """
+
     st.session_state[state] = to
 
 
-# convert chosen spec name to index
 def get_chosen_spec_index():
+    """
+    Get the current chosen specification index.
+
+    Returns
+    -------
+    : int
+        the current chosen specification index
+
+    """
     return int(st.session_state['chosen_spec'][7:]) - 1
 
 
-# callback for button "Add"
 def add_spec():
+    """
+        Callback function for "Add" button.
+        Append an initial specification to the "specs" session state.
+    """
     st.session_state['specs'].append(INIT_SPEC)
-    st.session_state['chosen_spec'] = 'Object ' + str(len(st.session_state['specs']) - 1)
+    st.session_state['chosen_spec'] = 'Object ' + str(len(st.session_state['specs']))
     change_session_state('global_state', GLOBAL_STATE[0])
 
 
-# callback for button "Remove"
 def remove_spec():
+    """
+        callback for "Remove" button.
+        Remove the chosen specification.
+    """
     if len(st.session_state['specs']) > 1:
         st.session_state['specs'].pop(get_chosen_spec_index())
         st.session_state['chosen_spec'] = 'Object 1'
@@ -54,10 +80,39 @@ def remove_spec():
 
 
 def set_spec(i: int, key: str, value):
+    """
+        Set the value of key in i-th specification
+
+    Parameters
+    ----------
+    i: int
+        the i-th specification
+    key: str
+        the key of the dictionary entry
+    value:
+        the value to set to
+    """
     st.session_state['specs'][i][key] = value
 
 
-def save_spec(i, obj: str, size_min: int, vis_attr: str, loc: str, n_images):
+def save_spec(i:int, obj: str, size_min: int, vis_attr: str, loc: str, n_images:int):
+    """
+        Converting the values of the specification that the user specified and save it to "specs" in session state.
+    Parameters
+    ----------
+    i: int
+        the i-th specification
+    obj:
+        the object string
+    size_min: int
+        the percentage of the minimal occupancy
+    vis_attr: str
+        visual attributes
+    loc: str
+        location
+    n_images: int
+        number of images to generate
+    """
     spec = {'obj': obj,
             'size_min': size_min / 100,
             'vis_attr': vis_attr.split(';'),
@@ -67,6 +122,9 @@ def save_spec(i, obj: str, size_min: int, vis_attr: str, loc: str, n_images):
 
 
 def initialize_session_states():
+    """
+        Initialize the session state
+    """
     # Global state
     if 'global_state' not in st.session_state:
         st.session_state['global_state'] = GLOBAL_STATE[0]
@@ -180,6 +238,7 @@ if __name__ == '__main__':
         change_session_state('ignore_blank', False)
 
     elif st.session_state['global_state'] == GLOBAL_STATE[1]:
+        # find empty specification and ask user whether to ignore them
         specs = {i: spec for i, spec in enumerate(st.session_state['specs']) if spec['obj'].strip() != ''}
         specs_unspecified = [i + 1 for i, spec in enumerate(st.session_state['specs']) if spec['obj'].strip() == '']
         if len(specs_unspecified) > 0 and not st.session_state['ignore_blank']:
@@ -192,6 +251,7 @@ if __name__ == '__main__':
             change_session_state('global_state', GLOBAL_STATE[0])
             st.experimental_rerun()
         else:
+            # request the worker to match images
             st.warning('Matching images...')
             try:
                 matching_results = request_worker('match', specs, args.username, args.password)
@@ -213,6 +273,7 @@ if __name__ == '__main__':
             with open(temp_dir + 'specs.json', 'w') as f:
                 json.dump(specs, f)
 
+            # retrieve matched images
             st.warning('Retrieving images...')
             captions_remaining = []
             for obj_idx, obj_spec in matching_results.items():
@@ -230,6 +291,7 @@ if __name__ == '__main__':
             st.session_state['captions_remaining'] = captions_remaining
             st.success('Retrieving images done.')
 
+            # ask the user whether to generate the un-matched images
             total_n_images_remaining = sum([o[1] for o in captions_remaining])
             if total_n_images_remaining > 0:
                 st.warning(f'Failed to find match for # {[o[0] for o in captions_remaining if o[1] > 0]} objects, '
@@ -249,6 +311,7 @@ if __name__ == '__main__':
                 st.experimental_rerun()
 
     elif st.session_state['global_state'] == GLOBAL_STATE[2]:
+        # request the worker to generate un-matched images
         matching_results = st.session_state['matching_results']
         captions_remaining = st.session_state['captions_remaining']
         total_n_images_remaining = sum([o[1] for o in captions_remaining])
@@ -267,6 +330,7 @@ if __name__ == '__main__':
         st.experimental_rerun()
 
     elif st.session_state['global_state'] == GLOBAL_STATE[3]:
+        # assemble the images
         temp_dir = st.session_state['temp_dir']
         if st.session_state['equalize_img']:
             for img_name in os.listdir(temp_dir + 'images/'):

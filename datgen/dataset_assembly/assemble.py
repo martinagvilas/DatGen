@@ -10,6 +10,21 @@ from skimage import exposure
 
 
 def show_images(imgs: list[Image.Image], n_imgs_to_show: int = 9, n_per_col: int = 3):
+    """
+        Show example images in columns
+    Parameters
+    ----------
+    imgs: list of PIL image
+        the images to show
+    n_imgs_to_show: int
+        the number of example images to show
+    n_per_col: int
+        the number of images in a column
+
+    Returns
+    -------
+
+    """
     if len(imgs) == 0:
         return
     if n_imgs_to_show <= 0 or n_per_col <= 0:
@@ -33,6 +48,21 @@ def show_images(imgs: list[Image.Image], n_imgs_to_show: int = 9, n_per_col: int
 
 
 def create_download_button(temp_dir: str, imgs_dir: str, specs_dir: str):
+    """
+        Compress the generated data and create a download button.
+    Parameters
+    ----------
+    temp_dir: str
+        the path of the temp folder
+    imgs_dir: str
+        the path of the folder containing image data
+    specs_dir:
+         the path of the folder to store the specifications
+
+    Returns
+    -------
+
+    """
     if not os.path.isdir(temp_dir) or not os.path.isdir(imgs_dir):
         raise FileNotFoundError('Invalid temp directory')
 
@@ -52,6 +82,18 @@ def create_download_button(temp_dir: str, imgs_dir: str, specs_dir: str):
 
 
 def equalize_contrast(img: Image.Image):
+    """
+        Equalize the contrast of an image
+    Parameters
+    ----------
+    img: PIL image
+        the image to be equalized
+    Returns
+    -------
+    : PIL image
+        the equalized image
+
+    """
     img_equalized = exposure.equalize_hist(np.asarray(img))
     img_equalized = Image.fromarray((img_equalized * 255).astype(np.uint8))
     return img_equalized
