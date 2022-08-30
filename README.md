@@ -1,13 +1,14 @@
 # DatGen
 _A web application for creating your own image dataset_
 
-
-TODO: Description of the problem, solution
-
 ## Using DatGen
-TODO: Link to website
-TODO: description on how to use it 
+DatGen allows you to:
+- Easily create your own customized image dataset through an intuitive web application.
+- Decide which and how objects appear in your dataset using natural language input.
+- Make use of human annotated public datasets.
+- Leverage multimodal AI systems capable of detecting and generating images matching your needs.
 
+If you want to start using DatGen, head over [here]().
 
 ## Reporting an issue
 If you are experiencing an issue when using DatGen, or 
