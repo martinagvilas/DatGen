@@ -7,10 +7,14 @@ import random
 from PIL import Image
 import numpy as np
 from skimage import exposure
-import time
 
 
-def show_images(imgs, n_imgs_to_show=9, n_per_col=3):
+def show_images(imgs: list[Image.Image], n_imgs_to_show: int = 9, n_per_col: int = 3):
+    if len(imgs) == 0:
+        return
+    if n_imgs_to_show <= 0 or n_per_col <= 0:
+        n_imgs_to_show = 9
+        n_per_col = 3
     if len(imgs) >= n_imgs_to_show:
         imgs_chosen = random.sample(imgs, n_imgs_to_show)
     else:
@@ -25,9 +29,13 @@ def show_images(imgs, n_imgs_to_show=9, n_per_col=3):
                 if count < len(imgs_resized):
                     st.image(imgs_resized[count])
                     count += 1
+    return
 
 
-def create_download_button(temp_dir, imgs_dir, specs_dir):
+def create_download_button(temp_dir: str, imgs_dir: str, specs_dir: str):
+    if not os.path.isdir(temp_dir) or not os.path.isdir(imgs_dir):
+        raise FileNotFoundError('Invalid temp directory')
+
     zip_dir = temp_dir + 'dataset.zip'
     if exists(zip_dir):
         os.remove(zip_dir)
@@ -40,9 +48,10 @@ def create_download_button(temp_dir, imgs_dir, specs_dir):
         dataset = f.read()
     st.write(f'Dataset Size:{file_size:>8.4f}MB.')
     st.download_button(f'Download Dataset! ', dataset, file_name=zip_dir, mime='application/zip')
+    return None
 
 
-def equalize_contrast(path, path_save):
-    for img_name in os.listdir(path):
-        img_equalized = exposure.equalize_hist(np.asarray(Image.open(path + img_name)))
-        Image.fromarray((img_equalized * 255).astype(np.uint8)).save(path_save + img_name, 'PNG')
+def equalize_contrast(img: Image.Image):
+    img_equalized = exposure.equalize_hist(np.asarray(img))
+    img_equalized = Image.fromarray((img_equalized * 255).astype(np.uint8))
+    return img_equalized

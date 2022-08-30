@@ -8,6 +8,7 @@ torch
 setuptools
 pycocotools
 sauth
+numpy
 
 # App
 streamlit
